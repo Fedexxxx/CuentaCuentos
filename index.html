@@ -851,7 +851,7 @@ function markStepDone(el) {
 
 // ── CLAUDE: Story text generation ──
 async function generateStoryText() {
-  const response = await fetch('https://api.anthropic.com/v1/messages', {
+const response = await fetch('/api/generate-story', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({
@@ -920,7 +920,7 @@ async function generateOneImage(page, index) {
   const fullPrompt = `${IMAGE_STYLE}. Scene: ${page.image_prompt}`;
 
   try {
-    const resp = await fetch('https://api.openai.com/v1/images/generations', {
+    const resp = await fetch('/api/generate-image', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
