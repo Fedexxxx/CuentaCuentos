@@ -889,9 +889,10 @@ Reglas del cuento:
 
   const data = await response.json();
   if (data.error) throw new Error(data.error.message || 'Error de API de Claude');
-  const raw = data.content.map(b => b.text || '').join('');
-  const clean = raw.replace(/```json|```/g, '').trim();
-  return JSON.parse(clean);
+const raw = data.content.map(b => b.text || '').join('');
+const clean = raw.replace(/```json|```/g, '').trim();
+console.log('Claude raw response:', clean);
+const story = JSON.parse(clean);
 }
 
 // ── OPENAI: Parallel image generation ──
