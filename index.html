@@ -896,6 +896,7 @@ Reglas del cuento:
 
 // ── OPENAI: Parallel image generation ──
 async function generateImages(story) {
+  console.log('Story pages received:', JSON.stringify(story.pages));
   const pages = story.pages;
   const progressRow = document.getElementById('img-progress-row');
   progressRow.style.display = 'flex';
