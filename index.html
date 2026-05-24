@@ -893,7 +893,10 @@ if (data.error) throw new Error(data.error.message || 'Error de API de Claude');
 const raw = data.content.map(b => b.text || '').join('');
 const clean = raw.replace(/```json|```/g, '').trim();
 console.log('Cleaned response:', clean);
-return JSON.parse(clean);
+// Extract JSON more robustly
+const jsonMatch = clean.match(/\{[\s\S]*\}/);
+if (!jsonMatch) throw new Error('No JSON found in response');
+return JSON.parse(jsonMatch[0]);
 console.log('Story generated OK:', story.title);
 }
 
