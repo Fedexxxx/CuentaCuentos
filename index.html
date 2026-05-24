@@ -9,7 +9,7 @@
      ╚══════════════════════════════════════════╝ -->
 <script>
  const OPENAI_API_KEY = 'sk-PEGA-TU-KEY-AQUÍ';
- const IMAGES_ENABLED = false;
+ const IMAGES_ENABLED = OPENAI_API_KEY.startsWith('sk-') && OPENAI_API_KEY.length > 20 && !OPENAI_API_KEY.includes('PEGA');
 </script>
 <link href="https://fonts.googleapis.com/css2?family=Fredoka+One&family=Nunito:wght@400;600;700;800&display=swap" rel="stylesheet">
 <style>
