@@ -893,6 +893,7 @@ const raw = data.content.map(b => b.text || '').join('');
 const clean = raw.replace(/```json|```/g, '').trim();
 console.log('Claude raw response:', clean);
 const story = JSON.parse(clean);
+console.log('Story generated OK:', story.title);
 }
 
 // ── OPENAI: Parallel image generation ──
