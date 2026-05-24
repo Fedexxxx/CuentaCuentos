@@ -928,7 +928,6 @@ async function generateOneImage(page, index) {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
-        'Authorization': `Bearer ${OPENAI_API_KEY}`
       },
       body: JSON.stringify({
         model: 'dall-e-3',
