@@ -887,12 +887,13 @@ Reglas del cuento:
     })
   });
 
-  const data = await response.json();
-  if (data.error) throw new Error(data.error.message || 'Error de API de Claude');
+const data = await response.json();
+console.log('Full API response:', JSON.stringify(data));
+if (data.error) throw new Error(data.error.message || 'Error de API de Claude');
 const raw = data.content.map(b => b.text || '').join('');
 const clean = raw.replace(/```json|```/g, '').trim();
-console.log('Claude raw response:', clean);
-const story = JSON.parse(clean);
+console.log('Cleaned response:', clean);
+return JSON.parse(clean);
 console.log('Story generated OK:', story.title);
 }
 
