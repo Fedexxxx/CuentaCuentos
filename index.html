@@ -933,7 +933,7 @@ async function generateOneImage(page, index) {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
-        model: 'gpt-image-1-mini',
+        model: 'gpt-image-1',
         prompt: fullPrompt,
         n: 1,
         size: '1024x1024',
@@ -944,7 +944,8 @@ async function generateOneImage(page, index) {
     const data = await resp.json();
     if (data.error) throw new Error(data.error.message);
 
-    const url = data.data[0].url;
+    const b64 = data.data[0].b64_json;
+const url = `data:image/png;base64,${b64}`;
     if (imgEl) {
       imgEl.src = url;
       imgEl.onload = () => {
