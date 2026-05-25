@@ -9,8 +9,9 @@ export default async function handler(req, res) {
   try {
     const body = typeof req.body === 'string' ? JSON.parse(req.body) : req.body;
 
-    console.log('Image prompt received:', body.prompt);
+    console.log('Full body received:', JSON.stringify(body));
     console.log('OpenAI key exists:', !!process.env.OPENAI_API_KEY);
+    console.log('OpenAI key prefix:', process.env.OPENAI_API_KEY?.substring(0, 10));
 
     const response = await fetch('https://api.openai.com/v1/images/generations', {
       method: 'POST',
@@ -22,10 +23,10 @@ export default async function handler(req, res) {
     });
 
     const data = await response.json();
-    console.log('OpenAI response status:', response.status);
+    console.log('OpenAI full response:', JSON.stringify(data));
     res.status(200).json(data);
   } catch (err) {
-    console.log('Image error:', err.message);
+    console.log('Error:', err.message);
     res.status(500).json({ error: err.message });
   }
 }
