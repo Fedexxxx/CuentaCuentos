@@ -4,11 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>CuentaCuentos — by Sherpas</title>
-<!-- ╔══════════════════════════════════════════╗
-     ║  CONFIGURACIÓN — pegá tu API key aquí    ║
-     ╚══════════════════════════════════════════╝ -->
 <script>
-const OPENAI_API_KEY = '';
 const IMAGES_ENABLED = true;
 </script>
 <link href="https://fonts.googleapis.com/css2?family=Fredoka+One&family=Nunito:wght@400;600;700;800&display=swap" rel="stylesheet">
@@ -300,45 +296,53 @@ const IMAGES_ENABLED = true;
     display: none;
   }
 
-  /* ── READER SCREEN ── */
-  #screen-reader { background: #1A1208; }
+  /* ── READER SCREEN — PICTURE BOOK ── */
+  #screen-reader {
+    background: #0F0A06;
+    display: flex;
+    flex-direction: column;
+  }
 
   .reader-topbar {
-    background: rgba(26,18,8,0.95);
-    padding: 12px 16px;
+    background: rgba(15,10,6,0.97);
+    padding: 10px 16px;
     display: flex; align-items: center; justify-content: space-between;
-    border-bottom: 1px solid rgba(255,255,255,0.08);
+    border-bottom: 1px solid rgba(255,255,255,0.06);
     flex-shrink: 0;
+    z-index: 10;
   }
   .reader-title {
     font-family: 'Fredoka One', cursive;
-    font-size: 14px; color: #fff;
+    font-size: 14px; color: rgba(255,255,255,0.85);
     flex: 1; text-overflow: ellipsis; overflow: hidden; white-space: nowrap;
+    margin-right: 10px;
   }
   .page-badge {
-    background: rgba(255,107,53,0.2);
+    background: rgba(255,107,53,0.18);
     color: var(--orange);
+    border: 1px solid rgba(255,107,53,0.3);
     border-radius: var(--radius-pill);
     padding: 3px 10px;
     font-size: 11px; font-weight: 700;
-    flex-shrink: 0; margin-left: 10px;
+    flex-shrink: 0;
   }
 
-  .comic-stage {
-    flex: 1; display: flex; flex-direction: column;
-    overflow: hidden; position: relative;
-  }
-
-  .pages-container {
-    flex: 1; display: flex; overflow: hidden;
+  .book-stage {
+    flex: 1;
     position: relative;
+    overflow: hidden;
+    min-height: 0;
   }
 
   .comic-page {
-    position: absolute; inset: 0;
-    display: flex; flex-direction: column;
-    opacity: 0; transform: translateX(40px);
-    transition: all 0.35s cubic-bezier(0.4, 0, 0.2, 1);
+    position: absolute;
+    inset: 0;
+    display: flex;
+    flex-direction: column;
+    opacity: 0;
+    transform: translateX(60px);
+    transition: opacity 0.38s cubic-bezier(0.4, 0, 0.2, 1),
+                transform 0.38s cubic-bezier(0.4, 0, 0.2, 1);
     pointer-events: none;
   }
   .comic-page.active {
@@ -346,81 +350,155 @@ const IMAGES_ENABLED = true;
     pointer-events: all;
   }
   .comic-page.exit {
-    opacity: 0; transform: translateX(-40px);
+    opacity: 0; transform: translateX(-60px);
   }
 
-  .illustration {
-    height: 210px;
-    display: flex; align-items: center; justify-content: center;
-    flex-shrink: 0;
+  .page-illustration {
     position: relative;
+    flex: 0 0 65%;
     overflow: hidden;
   }
-  .illustration .big-emoji { font-size: 72px; z-index: 1; }
-  .illustration .deco {
-    position: absolute; font-size: 24px; opacity: 0.25;
+
+  .page-illustration.bg-0 { background: linear-gradient(160deg, #FFB347 0%, #FF6B35 60%, #C94020 100%); }
+  .page-illustration.bg-1 { background: linear-gradient(160deg, #74C0FC 0%, #4A9EDB 60%, #1A6BA8 100%); }
+  .page-illustration.bg-2 { background: linear-gradient(160deg, #C084FC 0%, #9B5DE5 60%, #6B21C8 100%); }
+  .page-illustration.bg-3 { background: linear-gradient(160deg, #FDE68A 0%, #F59E0B 60%, #B45309 100%); }
+  .page-illustration.bg-4 { background: linear-gradient(160deg, #86EFAC 0%, #22C55E 60%, #15803D 100%); }
+  .page-illustration.bg-5 { background: linear-gradient(160deg, #FCA5A5 0%, #F87171 60%, #B91C1C 100%); }
+
+  .illus-img {
+    position: absolute;
+    inset: 0;
+    width: 100%; height: 100%;
+    object-fit: cover;
+    opacity: 0;
+    transition: opacity 0.6s ease;
   }
-  .illus-caption {
-    position: absolute; bottom: 8px; left: 0; right: 0;
-    text-align: center; font-size: 10px;
-    font-weight: 700; color: rgba(255,255,255,0.5);
-    text-transform: uppercase; letter-spacing: 0.8px;
+  .illus-img.loaded { opacity: 1; }
+
+  @keyframes shimmer {
+    0% { background-position: -880px 0; }
+    100% { background-position: 880px 0; }
+  }
+  .illus-shimmer {
+    position: absolute; inset: 0;
+    display: flex; align-items: center; justify-content: center;
+    flex-direction: column; gap: 8px;
+    background: linear-gradient(90deg, rgba(255,255,255,0.04) 25%, rgba(255,255,255,0.1) 50%, rgba(255,255,255,0.04) 75%);
+    background-size: 880px 100%;
+    animation: shimmer 1.6s ease-in-out infinite;
+    transition: opacity 0.4s ease;
+  }
+  .illus-shimmer.hidden { opacity: 0; pointer-events: none; }
+  .shimmer-emoji { font-size: 56px; filter: drop-shadow(0 4px 12px rgba(0,0,0,0.3)); }
+  .shimmer-text {
+    font-size: 11px; font-weight: 700;
+    color: rgba(255,255,255,0.5);
+    text-transform: uppercase; letter-spacing: 1px;
   }
 
-  .page-text-area {
+  .page-text-panel {
+    flex: 0 0 35%;
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    padding: 0;
+    overflow: hidden;
+    background: #0F0A06;
+  }
+
+  .page-text-content {
     flex: 1;
-    background: var(--surface);
-    padding: 18px 20px 16px;
-    display: flex; flex-direction: column; gap: 8px;
+    padding: 16px 20px 8px;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    overflow: hidden;
   }
-  .page-num {
+
+  .page-num-label {
     font-size: 10px; font-weight: 700;
-    color: var(--orange); text-transform: uppercase;
-    letter-spacing: 1px;
+    color: var(--orange);
+    text-transform: uppercase; letter-spacing: 1.2px;
   }
-  .page-text {
-    font-size: 15px; line-height: 1.7;
-    color: var(--ink); flex: 1;
+  .page-story-text {
+    font-size: 14px; line-height: 1.65;
+    color: rgba(255,255,255,0.88);
+    flex: 1;
+    overflow: hidden;
+    display: -webkit-box;
+    -webkit-line-clamp: 4;
+    -webkit-box-orient: vertical;
   }
-  .page-text strong { color: var(--orange-dark); }
+  .page-story-text strong { color: #FFB07A; }
 
   .reader-nav {
-    background: var(--surface);
-    padding: 12px 16px;
-    display: flex; align-items: center; gap: 8px;
-    border-top: 1px solid rgba(0,0,0,0.06);
+    padding: 10px 16px 12px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    border-top: 1px solid rgba(255,255,255,0.07);
     flex-shrink: 0;
   }
+
   .page-dots-row {
-    flex: 1; display: flex; gap: 5px; justify-content: center;
+    flex: 1; display: flex; gap: 5px; justify-content: center; align-items: center;
   }
   .pdot {
-    width: 6px; height: 6px; border-radius: 3px;
-    background: #E0D8D0; transition: all 0.25s;
+    width: 5px; height: 5px; border-radius: 3px;
+    background: rgba(255,255,255,0.2); transition: all 0.25s;
     cursor: pointer;
   }
-  .pdot.active { width: 20px; background: var(--orange); }
+  .pdot.active { width: 18px; background: var(--orange); }
 
   .r-btn {
-    width: 42px; height: 42px; border-radius: 50%;
-    border: 1.5px solid #E0D8D0;
-    background: transparent;
+    width: 38px; height: 38px; border-radius: 50%;
+    border: 1.5px solid rgba(255,255,255,0.15);
+    background: rgba(255,255,255,0.06);
     display: flex; align-items: center; justify-content: center;
-    cursor: pointer; font-size: 18px;
+    cursor: pointer; font-size: 16px;
     transition: all 0.15s;
-    color: var(--ink);
+    color: rgba(255,255,255,0.7);
     flex-shrink: 0;
   }
-  .r-btn:hover { border-color: var(--orange); color: var(--orange); }
-  .r-btn:disabled { opacity: 0.25; cursor: not-allowed; }
-  .r-btn.main {
-    flex: 1; border-radius: var(--radius-pill);
-    border-color: var(--orange); background: var(--orange);
-    color: #fff; font-family: 'Fredoka One', cursive;
-    font-size: 16px; width: auto; height: 42px;
+  .r-btn:hover { border-color: var(--orange); color: var(--orange); background: rgba(255,107,53,0.1); }
+  .r-btn:disabled { opacity: 0.2; cursor: not-allowed; }
+
+  .r-btn-main {
+    flex: 1;
+    height: 38px;
+    border-radius: var(--radius-pill);
+    border: none;
+    background: var(--orange);
+    color: #fff;
+    font-family: 'Fredoka One', cursive;
+    font-size: 15px;
+    cursor: pointer;
+    transition: all 0.15s;
     letter-spacing: 0.3px;
   }
-  .r-btn.main:hover { background: var(--orange-dark); border-color: var(--orange-dark); }
+  .r-btn-main:hover { background: var(--orange-dark); }
+  .r-btn-main:active { transform: scale(0.98); }
+
+  .swipe-hint {
+    position: absolute;
+    bottom: calc(35% + 12px);
+    left: 50%;
+    transform: translateX(-50%);
+    background: rgba(0,0,0,0.55);
+    color: rgba(255,255,255,0.7);
+    border-radius: var(--radius-pill);
+    padding: 4px 14px;
+    font-size: 11px; font-weight: 600;
+    letter-spacing: 0.3px;
+    pointer-events: none;
+    opacity: 0;
+    transition: opacity 0.4s ease;
+    z-index: 20;
+    white-space: nowrap;
+  }
+  .swipe-hint.visible { opacity: 1; }
 
   /* ── END SCREEN ── */
   #screen-end {
@@ -455,51 +533,6 @@ const IMAGES_ENABLED = true;
   .end-card .ec-ico { font-size: 26px; margin-bottom: 6px; }
   .end-card .ec-lbl { font-size: 11px; font-weight: 700; color: var(--ink-soft); }
 
-  /* Illustrations per page */
-  .illu-bg-1 { background: linear-gradient(135deg, #FF8C5A 0%, #FF6B35 100%); }
-  .illu-bg-2 { background: linear-gradient(135deg, #74C0FC 0%, #4A9EDB 100%); }
-  .illu-bg-3 { background: linear-gradient(135deg, #C084FC 0%, #9B5DE5 100%); }
-  .illu-bg-4 { background: linear-gradient(135deg, #FDE68A 0%, #F59E0B 100%); }
-  .illu-bg-5 { background: linear-gradient(135deg, #86EFAC 0%, #22C55E 100%); }
-  .illu-bg-6 { background: linear-gradient(135deg, #FCA5A5 0%, #F87171 100%); }
-
-  .sr-only { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0,0,0,0); border: 0; }
-
-  /* ── IMAGE SHIMMER ── */
-  @keyframes shimmer {
-    0% { background-position: -440px 0; }
-    100% { background-position: 440px 0; }
-  }
-  .img-shimmer {
-    position: absolute; inset: 0;
-    background: linear-gradient(90deg, #FFE8D6 25%, #FFF0E8 50%, #FFE8D6 75%);
-    background-size: 880px 100%;
-    animation: shimmer 1.4s ease-in-out infinite;
-    display: flex; align-items: center; justify-content: center;
-    flex-direction: column; gap: 8px;
-  }
-  .img-shimmer .shimmer-icon { font-size: 36px; opacity: 0.4; animation: orb-pulse 2s ease-in-out infinite; }
-  .img-shimmer .shimmer-label { font-size: 11px; font-weight: 700; color: var(--orange); opacity: 0.7; text-transform: uppercase; letter-spacing: 0.8px; }
-
-  .illus-img {
-    position: absolute; inset: 0;
-    width: 100%; height: 100%;
-    object-fit: cover;
-    opacity: 0;
-    transition: opacity 0.5s ease;
-  }
-  .illus-img.loaded { opacity: 1; }
-
-  .img-error {
-    position: absolute; inset: 0;
-    display: flex; align-items: center; justify-content: center;
-    flex-direction: column; gap: 6px;
-    background: var(--orange-light);
-  }
-  .img-error .err-emoji { font-size: 40px; }
-  .img-error .err-text { font-size: 11px; color: var(--ink-muted); font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; }
-
-  /* generation image progress row */
   .img-progress-row {
     width: 100%;
     display: flex; gap: 6px; margin-top: 14px; justify-content: center;
@@ -511,6 +544,8 @@ const IMAGES_ENABLED = true;
   }
   .img-prog-dot.loading { background: var(--orange); animation: orb-pulse 1s ease-in-out infinite; }
   .img-prog-dot.done { background: var(--outcome-color); animation: none; }
+
+  .sr-only { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0,0,0,0); border: 0; }
 </style>
 </head>
 <body>
@@ -685,22 +720,14 @@ const IMAGES_ENABLED = true;
     <div class="gen-error" id="gen-error"></div>
   </div>
 
-  <!-- ── SCREEN 3: READER ── -->
+  <!-- ── SCREEN 3: READER — PICTURE BOOK ── -->
   <div id="screen-reader" class="screen">
     <div class="reader-topbar">
       <div class="reader-title" id="story-title">—</div>
       <div class="page-badge" id="page-badge">1 / 6</div>
     </div>
-    <div class="comic-stage">
-      <div class="pages-container" id="pages-container"></div>
-      <div style="background:var(--surface); padding: 8px 16px; display:flex; justify-content:center;">
-        <div class="page-dots-row" id="page-dots"></div>
-      </div>
-      <div class="reader-nav">
-        <button class="r-btn" id="btn-prev" disabled>◀</button>
-        <button class="r-btn main" id="btn-next">Siguiente</button>
-        <button class="r-btn" id="btn-fwd">▶</button>
-      </div>
+    <div class="book-stage" id="book-stage">
+      <div class="swipe-hint" id="swipe-hint">← deslizá para avanzar →</div>
     </div>
   </div>
 
@@ -729,29 +756,19 @@ const IMAGES_ENABLED = true;
 </div>
 
 <script>
-// ── STATE ──
 const selections = { hero: null, friend: null, villain: null, obstacle: null, outcome: null };
 const slotColors = { hero: '#FF6B35', friend: '#3B9EFF', villain: '#9B5DE5', obstacle: '#F4B942', outcome: '#2DC653' };
 const slotBg = { hero: '#FFF0E8', friend: '#EBF5FF', villain: '#F5EDFF', obstacle: '#FFF8E5', outcome: '#EDFFF3' };
 let storyPages = [];
 let currentPage = 0;
 
-const illuBgs = ['illu-bg-1','illu-bg-2','illu-bg-3','illu-bg-4','illu-bg-5','illu-bg-6'];
-const illuDecos = [
-  ['⭐','🌙','✨'],['☁️','🌿','💧'],['⚡','🔩','💜'],
-  ['🗝️','📜','💛'],['💥','🌀','🍃'],['🌈','⭐','✨']
-];
+const IMAGE_STYLE = "watercolor children's book illustration, warm pastel colors, soft brush strokes, friendly and whimsical, white border like a storybook page, no text or letters in image, safe for children";
 
-// Style prefix for ALL DALL-E calls — ensures visual consistency across pages
-const IMAGE_STYLE = 'watercolor children\'s book illustration, warm pastel colors, soft brush strokes, friendly and whimsical, white border like a storybook page, no text or letters in image, safe for children';
-
-// ── SCREEN SWITCHING ──
 function showScreen(id) {
   document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
   document.getElementById('screen-' + id).classList.add('active');
 }
 
-// ── CARD SELECTION ──
 document.querySelectorAll('.card').forEach(card => {
   card.addEventListener('click', () => {
     const slot = card.dataset.slot;
@@ -781,7 +798,6 @@ function updateRecipe() {
   ).join('');
 }
 
-// ── GENERATION ORCHESTRATOR ──
 document.getElementById('btn-create').addEventListener('click', startGeneration);
 
 async function startGeneration() {
@@ -790,7 +806,6 @@ async function startGeneration() {
   const bar = document.getElementById('gen-bar');
   let stepIdx = 0;
 
-  // Animate steps 0–2 while Claude is writing the story
   const stepTimer = setInterval(() => {
     if (stepIdx < 3) {
       if (stepIdx > 0) markStepDone(steps[stepIdx - 1]);
@@ -804,33 +819,28 @@ async function startGeneration() {
     `${selections.hero.emoji} ${selections.hero.label} y ${selections.friend.emoji} ${selections.friend.label} están a punto de vivir algo increíble...`;
 
   try {
-    // ── STEP 1: Generate story text via Claude ──
     const story = await generateStoryText();
     clearInterval(stepTimer);
 
-    // Mark steps 0–2 done, activate step 3 (illustrations)
     for (let i = 0; i < 3; i++) markStepDone(steps[i]);
     steps[3].classList.add('active');
     bar.style.width = '60%';
 
-    // ── STEP 2: Render reader with shimmer placeholders ──
     storyPages = story.pages;
     renderReader(story.title, story.pages);
 
-    // ── STEP 3: Generate images (parallel or skipped) ──
     if (IMAGES_ENABLED) {
       await generateImages(story);
     } else {
-      // No key — show emoji fallback, go straight to reader
-      document.getElementById('gen-subtitle').textContent = '(Imágenes desactivadas — agregá tu OpenAI key)';
-      await new Promise(r => setTimeout(r, 800));
+      await new Promise(r => setTimeout(r, 600));
     }
 
     markStepDone(steps[3]);
     bar.style.width = '100%';
-    await new Promise(r => setTimeout(r, 400));
+    await new Promise(r => setTimeout(r, 350));
     currentPage = 0;
     showScreen('reader');
+    showSwipeHint();
 
   } catch (err) {
     clearInterval(stepTimer);
@@ -849,9 +859,8 @@ function markStepDone(el) {
   el.querySelector('.step-icon').textContent = '✅';
 }
 
-// ── CLAUDE: Story text generation ──
 async function generateStoryText() {
-const response = await fetch('/api/generate-story', {
+  const response = await fetch('/api/generate-story', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({
@@ -887,22 +896,16 @@ Reglas del cuento:
     })
   });
 
-const data = await response.json();
-console.log('Full API response:', JSON.stringify(data));
-if (data.error) throw new Error(data.error.message || 'Error de API de Claude');
-const raw = data.content.map(b => b.text || '').join('');
-const clean = raw.replace(/```json|```/g, '').trim();
-console.log('Cleaned response:', clean);
-// Extract JSON more robustly
-const jsonMatch = clean.match(/\{[\s\S]*\}/);
-if (!jsonMatch) throw new Error('No JSON found in response');
-return JSON.parse(jsonMatch[0]);
-console.log('Story generated OK:', story.title);
+  const data = await response.json();
+  if (data.error) throw new Error(data.error.message || 'Error de API de Claude');
+  const raw = data.content.map(b => b.text || '').join('');
+  const clean = raw.replace(/```json|```/g, '').trim();
+  const jsonMatch = clean.match(/\{[\s\S]*\}/);
+  if (!jsonMatch) throw new Error('No JSON found in response');
+  return JSON.parse(jsonMatch[0]);
 }
 
-// ── OPENAI: Parallel image generation ──
 async function generateImages(story) {
-  console.log('Story pages received:', JSON.stringify(story.pages));
   const pages = story.pages;
   const progressRow = document.getElementById('img-progress-row');
   progressRow.style.display = 'flex';
@@ -912,7 +915,6 @@ async function generateImages(story) {
 
   document.getElementById('gen-subtitle').textContent = 'Dibujando las ilustraciones...';
 
-  // Fire all image requests in parallel
   const imagePromises = pages.map((page, i) => generateOneImage(page, i));
   await Promise.allSettled(imagePromises);
 }
@@ -929,15 +931,13 @@ async function generateOneImage(page, index) {
   try {
     const resp = await fetch('/api/generate-image', {
       method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
+      headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
-           model: 'gpt-image-1-mini',
-          prompt: fullPrompt,
-          n: 1,
-          size: '1024x1024',
-          quality: 'medium'
+        model: 'gpt-image-1-mini',
+        prompt: fullPrompt,
+        n: 1,
+        size: '1024x1024',
+        quality: 'medium'
       })
     });
 
@@ -949,15 +949,16 @@ async function generateOneImage(page, index) {
       imgEl.src = url;
       imgEl.onload = () => {
         imgEl.classList.add('loaded');
-        if (shimmerEl) shimmerEl.style.display = 'none';
+        if (shimmerEl) shimmerEl.classList.add('hidden');
       };
     }
     if (dot) { dot.classList.remove('loading'); dot.classList.add('done'); }
 
   } catch (err) {
-    // Graceful fallback — shimmer becomes error state, emoji stays visible
     if (shimmerEl) {
-      shimmerEl.innerHTML = `<div class="img-error"><div class="err-emoji">${page.emoji}</div><div class="err-text">Ilustración no disponible</div></div>`;
+      shimmerEl.innerHTML = `<div class="shimmer-emoji">${page.emoji}</div><div class="shimmer-text">Ilustración no disponible</div>`;
+      shimmerEl.style.animation = 'none';
+      shimmerEl.style.background = 'rgba(255,255,255,0.05)';
     }
     if (dot) { dot.classList.remove('loading'); dot.style.background = '#FFB0B0'; }
     console.warn('Image generation failed for page', index + 1, err.message);
@@ -973,81 +974,105 @@ function buildPrompt() {
 - Tema del final: ${selections.outcome.label} (${selections.outcome.emoji})`;
 }
 
-// ── READER ──
 function renderReader(title, pages) {
   document.getElementById('story-title').textContent = title;
   document.getElementById('pages-read').textContent = pages.length;
-  const container = document.getElementById('pages-container');
-  const dotsEl = document.getElementById('page-dots');
-  container.innerHTML = '';
-  dotsEl.innerHTML = '';
+
+  const stage = document.getElementById('book-stage');
+  stage.querySelectorAll('.comic-page').forEach(p => p.remove());
 
   pages.forEach((p, i) => {
-    const bg = illuBgs[i % illuBgs.length];
-    const decos = illuDecos[i % illuDecos.length];
     const pageEl = document.createElement('div');
     pageEl.className = 'comic-page' + (i === 0 ? ' active' : '');
     pageEl.id = 'cpage-' + i;
 
-    // Illustration area: shimmer + hidden img (+ emoji fallback inside shimmer)
     pageEl.innerHTML = `
-      <div class="illustration ${IMAGES_ENABLED ? '' : bg}" style="position:relative; overflow:hidden; ${IMAGES_ENABLED ? 'background:#FFE8D4' : ''}">
-        ${IMAGES_ENABLED
-          ? `<div class="img-shimmer" id="page-shimmer-${i}">
-               <div class="shimmer-icon">${p.emoji}</div>
-               <div class="shimmer-label">Dibujando...</div>
-             </div>
-             <img class="illus-img" id="page-img-${i}" alt="Ilustración de la página ${i + 1}" />`
-          : `<span class="deco" style="top:14px;left:20px">${decos[0]}</span>
-             <span class="deco" style="top:22px;right:24px">${decos[1]}</span>
-             <span class="deco" style="bottom:18px;right:18px">${decos[2]}</span>
-             <span class="big-emoji">${p.emoji}</span>`
-        }
-        <div class="illus-caption">Página ${p.page} de ${pages.length}</div>
+      <div class="page-illustration bg-${i % 6}">
+        <div class="illus-shimmer" id="page-shimmer-${i}">
+          <div class="shimmer-emoji">${p.emoji}</div>
+          <div class="shimmer-text">Dibujando...</div>
+        </div>
+        <img class="illus-img" id="page-img-${i}" alt="Ilustración de la página ${i + 1}" />
       </div>
-      <div class="page-text-area">
-        <div class="page-num">Página ${p.page}</div>
-        <div class="page-text">${p.text}</div>
+      <div class="page-text-panel">
+        <div class="page-text-content">
+          <div class="page-num-label">Página ${p.page} de ${pages.length}</div>
+          <div class="page-story-text">${p.text}</div>
+        </div>
+        <div class="reader-nav">
+          <button class="r-btn" id="prev-${i}" ${i === 0 ? 'disabled' : ''} onclick="goToPage(${i - 1})">◀</button>
+          <div class="page-dots-row" id="dots-${i}"></div>
+          <button class="r-btn-main" id="next-main-${i}" onclick="${i >= pages.length - 1 ? 'showScreen(\'end\')' : `goToPage(${i + 1})`}">
+            ${i >= pages.length - 1 ? '🎉 ¡Fin!' : 'Siguiente →'}
+          </button>
+          <button class="r-btn" id="fwd-${i}" ${i >= pages.length - 1 ? 'disabled' : ''} onclick="goToPage(${i + 1})">▶</button>
+        </div>
       </div>`;
-    container.appendChild(pageEl);
 
-    const dot = document.createElement('div');
-    dot.className = 'pdot' + (i === 0 ? ' active' : '');
-    dot.dataset.page = i;
-    dot.addEventListener('click', () => goToPage(i));
-    dotsEl.appendChild(dot);
+    stage.insertBefore(pageEl, document.getElementById('swipe-hint'));
+  });
+
+  pages.forEach((_, i) => {
+    const dotsEl = document.getElementById('dots-' + i);
+    pages.forEach((__, j) => {
+      const dot = document.createElement('div');
+      dot.className = 'pdot' + (j === i ? ' active' : '');
+      dot.onclick = () => goToPage(j);
+      dotsEl.appendChild(dot);
+    });
   });
 
   updateReaderNav();
+  setupSwipe();
 }
 
 function goToPage(n) {
-  const prev = document.getElementById('cpage-' + currentPage);
-  if (prev) { prev.classList.add('exit'); setTimeout(() => prev.classList.remove('active', 'exit'), 350); }
+  if (n < 0 || n >= storyPages.length) return;
+  const prevEl = document.getElementById('cpage-' + currentPage);
+  if (prevEl) {
+    prevEl.classList.add('exit');
+    setTimeout(() => prevEl.classList.remove('active', 'exit'), 380);
+  }
   currentPage = n;
-  const next = document.getElementById('cpage-' + currentPage);
-  if (next) { next.style.transform = 'translateX(40px)'; next.classList.add('active'); setTimeout(() => { next.style.transform = ''; }, 10); }
-  document.querySelectorAll('.pdot').forEach((d, i) => d.classList.toggle('active', i === currentPage));
+  const nextEl = document.getElementById('cpage-' + currentPage);
+  if (nextEl) {
+    nextEl.style.transform = 'translateX(60px)';
+    nextEl.classList.add('active');
+    setTimeout(() => { nextEl.style.transform = ''; }, 10);
+  }
   updateReaderNav();
 }
 
 function updateReaderNav() {
   const total = storyPages.length || 6;
   document.getElementById('page-badge').textContent = (currentPage + 1) + ' / ' + total;
-  document.getElementById('btn-prev').disabled = currentPage === 0;
-  document.getElementById('btn-fwd').disabled = currentPage >= total - 1;
-  const mainBtn = document.getElementById('btn-next');
-  mainBtn.textContent = currentPage >= total - 1 ? '🎉 ¡Fin del cuento!' : 'Siguiente página →';
 }
 
-document.getElementById('btn-prev').addEventListener('click', () => { if (currentPage > 0) goToPage(currentPage - 1); });
-document.getElementById('btn-fwd').addEventListener('click', () => { if (currentPage < storyPages.length - 1) goToPage(currentPage + 1); });
-document.getElementById('btn-next').addEventListener('click', () => {
-  if (currentPage < storyPages.length - 1) goToPage(currentPage + 1);
-  else showScreen('end');
-});
+function setupSwipe() {
+  const stage = document.getElementById('book-stage');
+  let startX = 0, startY = 0;
 
-// ── RESTART ──
+  stage.addEventListener('touchstart', e => {
+    startX = e.touches[0].clientX;
+    startY = e.touches[0].clientY;
+  }, { passive: true });
+
+  stage.addEventListener('touchend', e => {
+    const dx = e.changedTouches[0].clientX - startX;
+    const dy = e.changedTouches[0].clientY - startY;
+    if (Math.abs(dx) > Math.abs(dy) && Math.abs(dx) > 40) {
+      if (dx < 0 && currentPage < storyPages.length - 1) goToPage(currentPage + 1);
+      else if (dx > 0 && currentPage > 0) goToPage(currentPage - 1);
+    }
+  }, { passive: true });
+}
+
+function showSwipeHint() {
+  const hint = document.getElementById('swipe-hint');
+  hint.classList.add('visible');
+  setTimeout(() => hint.classList.remove('visible'), 2800);
+}
+
 function resetApp() {
   Object.keys(selections).forEach(k => selections[k] = null);
   document.querySelectorAll('.card').forEach(c => c.classList.remove('selected'));
@@ -1059,7 +1084,7 @@ function resetApp() {
   document.querySelectorAll('.gen-step-item').forEach(s => {
     s.classList.remove('active','done');
     const ico = s.querySelector('.step-icon');
-    ico.textContent = ico.dataset.orig || ico.textContent;
+    if (ico.dataset.orig) ico.textContent = ico.dataset.orig;
   });
   document.getElementById('gen-bar').style.width = '0%';
   updateRecipe();
@@ -1071,7 +1096,6 @@ function resetApp() {
 document.getElementById('btn-play-again').addEventListener('click', resetApp);
 document.getElementById('btn-new-story').addEventListener('click', resetApp);
 
-// Save original step icons
 document.querySelectorAll('.gen-step-item .step-icon').forEach(ico => ico.dataset.orig = ico.textContent);
 </script>
 </body>
