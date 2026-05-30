@@ -141,68 +141,43 @@ const IMAGES_ENABLED = true;
 
   .cards-scroll {
     display: flex; gap: 10px;
-    overflow-x: auto; padding-bottom: 6px; padding-top: 2px;
+    overflow-x: auto; padding-bottom: 4px;
     scrollbar-width: none;
   }
   .cards-scroll::-webkit-scrollbar { display: none; }
 
   .card {
-    flex: 0 0 92px;
+    flex: 0 0 86px;
     background: var(--cream);
     border: 2px solid transparent;
-    border-radius: 14px;
-    padding: 14px 8px 11px;
+    border-radius: var(--radius-sm);
+    padding: 12px 8px 10px;
     cursor: pointer;
     text-align: center;
-    transition: all 0.2s cubic-bezier(0.34, 1.56, 0.64, 1);
+    transition: all 0.18s cubic-bezier(0.34, 1.56, 0.64, 1);
     user-select: none;
     position: relative;
-    box-shadow: 0 2px 6px rgba(0,0,0,0.05);
   }
-  .card:hover {
-    transform: translateY(-3px);
-    border-color: var(--slot-color, var(--border-strong));
-    box-shadow: 0 6px 18px rgba(0,0,0,0.1);
-  }
+  .card:hover { transform: translateY(-2px); border-color: var(--border-strong); }
   .card.selected {
-    transform: translateY(-4px) scale(1.04);
-    border-color: var(--slot-color, var(--orange));
-    background: var(--slot-bg, var(--orange-light));
-    box-shadow: 0 8px 24px var(--slot-shadow, rgba(255,107,53,0.25));
+    transform: translateY(-3px) scale(1.03);
+    background: var(--orange-light);
+    box-shadow: 0 4px 16px rgba(255,107,53,0.2);
   }
   .card .check {
-    position: absolute; top: 7px; right: 7px;
-    width: 18px; height: 18px; border-radius: 50%;
-    background: var(--slot-color, var(--orange)); color: #fff;
-    font-size: 10px; display: none;
+    position: absolute; top: 6px; right: 6px;
+    width: 16px; height: 16px; border-radius: 50%;
+    background: var(--orange); color: #fff;
+    font-size: 9px; display: none;
     align-items: center; justify-content: center;
-    box-shadow: 0 2px 6px rgba(0,0,0,0.2);
   }
   .card.selected .check { display: flex; }
-
-  /* Emoji container con fondo circular suave */
-  .card .emoji-wrap {
-    width: 54px; height: 54px;
-    border-radius: 50%;
-    background: rgba(255,255,255,0.7);
-    display: flex; align-items: center; justify-content: center;
-    margin: 0 auto 8px;
-    transition: transform 0.2s cubic-bezier(0.34, 1.56, 0.64, 1);
-    box-shadow: 0 2px 8px rgba(0,0,0,0.08);
-  }
-  .card:hover .emoji-wrap { transform: scale(1.08); }
-  .card.selected .emoji-wrap {
-    background: rgba(255,255,255,0.9);
-    transform: scale(1.1);
-    box-shadow: 0 4px 12px rgba(0,0,0,0.12);
-  }
-  .card .emoji { font-size: 30px; display: block; line-height: 1; }
+  .card .emoji { font-size: 28px; display: block; margin-bottom: 6px; }
   .card .name {
-    font-size: 10px; font-weight: 800;
+    font-size: 10px; font-weight: 700;
     color: var(--ink-soft); line-height: 1.3;
-    letter-spacing: 0.1px;
   }
-  .card.selected .name { color: var(--slot-color, var(--orange-dark)); }
+  .card.selected .name { color: var(--orange-dark); }
 
   .recipe-area {
     background: var(--cream);
@@ -612,20 +587,20 @@ const IMAGES_ENABLED = true;
           Héroe principal
         </div>
         <div class="cards-scroll">
-          <div class="card" data-slot="hero" data-val="nina" data-label="Niña valiente" data-emoji="👧" style="--slot-color:var(--hero-color);--slot-bg:#FFF0E8;--slot-shadow:rgba(255,107,53,0.22)">
-            <div class="check">✓</div><div class="emoji-wrap"><span class="emoji">👧</span></div><div class="name">Niña valiente</div>
+          <div class="card" data-slot="hero" data-val="nina" data-label="Niña valiente" data-emoji="👧">
+            <div class="check">✓</div><span class="emoji">👧</span><div class="name">Niña valiente</div>
           </div>
-          <div class="card" data-slot="hero" data-val="robot" data-label="Robot curioso" data-emoji="🤖" style="--slot-color:var(--hero-color);--slot-bg:#FFF0E8;--slot-shadow:rgba(255,107,53,0.22)">
-            <div class="check">✓</div><div class="emoji-wrap"><span class="emoji">🤖</span></div><div class="name">Robot curioso</div>
+          <div class="card" data-slot="hero" data-val="robot" data-label="Robot curioso" data-emoji="🤖">
+            <div class="check">✓</div><span class="emoji">🤖</span><div class="name">Robot curioso</div>
           </div>
-          <div class="card" data-slot="hero" data-val="zorro" data-label="Zorro astuto" data-emoji="🦊" style="--slot-color:var(--hero-color);--slot-bg:#FFF0E8;--slot-shadow:rgba(255,107,53,0.22)">
-            <div class="check">✓</div><div class="emoji-wrap"><span class="emoji">🦊</span></div><div class="name">Zorro astuto</div>
+          <div class="card" data-slot="hero" data-val="zorro" data-label="Zorro astuto" data-emoji="🦊">
+            <div class="check">✓</div><span class="emoji">🦊</span><div class="name">Zorro astuto</div>
           </div>
-          <div class="card" data-slot="hero" data-val="bruja" data-label="Bruja buena" data-emoji="🧙‍♀️" style="--slot-color:var(--hero-color);--slot-bg:#FFF0E8;--slot-shadow:rgba(255,107,53,0.22)">
-            <div class="check">✓</div><div class="emoji-wrap"><span class="emoji">🧙‍♀️</span></div><div class="name">Bruja buena</div>
+          <div class="card" data-slot="hero" data-val="bruja" data-label="Bruja buena" data-emoji="🧙‍♀️">
+            <div class="check">✓</div><span class="emoji">🧙‍♀️</span><div class="name">Bruja buena</div>
           </div>
-          <div class="card" data-slot="hero" data-val="explorador" data-label="Explorador" data-emoji="🧭" style="--slot-color:var(--hero-color);--slot-bg:#FFF0E8;--slot-shadow:rgba(255,107,53,0.22)">
-            <div class="check">✓</div><div class="emoji-wrap"><span class="emoji">🧭</span></div><div class="name">Explorador</div>
+          <div class="card" data-slot="hero" data-val="explorador" data-label="Explorador" data-emoji="🧭">
+            <div class="check">✓</div><span class="emoji">🧭</span><div class="name">Explorador</div>
           </div>
         </div>
       </div>
@@ -636,20 +611,20 @@ const IMAGES_ENABLED = true;
           Amigo especial
         </div>
         <div class="cards-scroll">
-          <div class="card" data-slot="friend" data-val="dragon" data-label="Dragón torpe" data-emoji="🐉" style="--slot-color:var(--friend-color);--slot-bg:#EBF5FF;--slot-shadow:rgba(59,158,255,0.22)">
-            <div class="check">✓</div><div class="emoji-wrap"><span class="emoji">🐉</span></div><div class="name">Dragón torpe</div>
+          <div class="card" data-slot="friend" data-val="dragon" data-label="Dragón torpe" data-emoji="🐉">
+            <div class="check">✓</div><span class="emoji">🐉</span><div class="name">Dragón torpe</div>
           </div>
-          <div class="card" data-slot="friend" data-val="fantasma" data-label="Fantasma tímido" data-emoji="👻" style="--slot-color:var(--friend-color);--slot-bg:#EBF5FF;--slot-shadow:rgba(59,158,255,0.22)">
-            <div class="check">✓</div><div class="emoji-wrap"><span class="emoji">👻</span></div><div class="name">Fantasma tímido</div>
+          <div class="card" data-slot="friend" data-val="fantasma" data-label="Fantasma tímido" data-emoji="👻">
+            <div class="check">✓</div><span class="emoji">👻</span><div class="name">Fantasma tímido</div>
           </div>
-          <div class="card" data-slot="friend" data-val="anciana" data-label="Anciana sabia" data-emoji="👵" style="--slot-color:var(--friend-color);--slot-bg:#EBF5FF;--slot-shadow:rgba(59,158,255,0.22)">
-            <div class="check">✓</div><div class="emoji-wrap"><span class="emoji">👵</span></div><div class="name">Anciana sabia</div>
+          <div class="card" data-slot="friend" data-val="anciana" data-label="Anciana sabia" data-emoji="👵">
+            <div class="check">✓</div><span class="emoji">👵</span><div class="name">Anciana sabia</div>
           </div>
-          <div class="card" data-slot="friend" data-val="pulpo" data-label="Pulpo músico" data-emoji="🐙" style="--slot-color:var(--friend-color);--slot-bg:#EBF5FF;--slot-shadow:rgba(59,158,255,0.22)">
-            <div class="check">✓</div><div class="emoji-wrap"><span class="emoji">🐙</span></div><div class="name">Pulpo músico</div>
+          <div class="card" data-slot="friend" data-val="pulpo" data-label="Pulpo músico" data-emoji="🐙">
+            <div class="check">✓</div><span class="emoji">🐙</span><div class="name">Pulpo músico</div>
           </div>
-          <div class="card" data-slot="friend" data-val="robot2" data-label="Robot pequeño" data-emoji="🦾" style="--slot-color:var(--friend-color);--slot-bg:#EBF5FF;--slot-shadow:rgba(59,158,255,0.22)">
-            <div class="check">✓</div><div class="emoji-wrap"><span class="emoji">🦾</span></div><div class="name">Robot pequeño</div>
+          <div class="card" data-slot="friend" data-val="robot2" data-label="Robot pequeño" data-emoji="🦾">
+            <div class="check">✓</div><span class="emoji">🦾</span><div class="name">Robot pequeño</div>
           </div>
         </div>
       </div>
@@ -660,20 +635,20 @@ const IMAGES_ENABLED = true;
           El villano
         </div>
         <div class="cards-scroll">
-          <div class="card" data-slot="villain" data-val="rey-caos" data-label="Rey del caos" data-emoji="🧟" style="--slot-color:var(--villain-color);--slot-bg:#F5EDFF;--slot-shadow:rgba(155,93,229,0.22)">
-            <div class="check">✓</div><div class="emoji-wrap"><span class="emoji">🧟</span></div><div class="name">Rey del caos</div>
+          <div class="card" data-slot="villain" data-val="rey-caos" data-label="Rey del caos" data-emoji="🧟">
+            <div class="check">✓</div><span class="emoji">🧟</span><div class="name">Rey del caos</div>
           </div>
-          <div class="card" data-slot="villain" data-val="maquina" data-label="Máquina del olvido" data-emoji="⚙️" style="--slot-color:var(--villain-color);--slot-bg:#F5EDFF;--slot-shadow:rgba(155,93,229,0.22)">
-            <div class="check">✓</div><div class="emoji-wrap"><span class="emoji">⚙️</span></div><div class="name">Máq. del olvido</div>
+          <div class="card" data-slot="villain" data-val="maquina" data-label="Máquina del olvido" data-emoji="⚙️">
+            <div class="check">✓</div><span class="emoji">⚙️</span><div class="name">Máq. del olvido</div>
           </div>
-          <div class="card" data-slot="villain" data-val="bruja-tiempo" data-label="Bruja del tiempo" data-emoji="🕰️" style="--slot-color:var(--villain-color);--slot-bg:#F5EDFF;--slot-shadow:rgba(155,93,229,0.22)">
-            <div class="check">✓</div><div class="emoji-wrap"><span class="emoji">🕰️</span></div><div class="name">Bruja del tiempo</div>
+          <div class="card" data-slot="villain" data-val="bruja-tiempo" data-label="Bruja del tiempo" data-emoji="🕰️">
+            <div class="check">✓</div><span class="emoji">🕰️</span><div class="name">Bruja del tiempo</div>
           </div>
-          <div class="card" data-slot="villain" data-val="sombra" data-label="La gran sombra" data-emoji="🌑" style="--slot-color:var(--villain-color);--slot-bg:#F5EDFF;--slot-shadow:rgba(155,93,229,0.22)">
-            <div class="check">✓</div><div class="emoji-wrap"><span class="emoji">🌑</span></div><div class="name">La gran sombra</div>
+          <div class="card" data-slot="villain" data-val="sombra" data-label="La gran sombra" data-emoji="🌑">
+            <div class="check">✓</div><span class="emoji">🌑</span><div class="name">La gran sombra</div>
           </div>
-          <div class="card" data-slot="villain" data-val="gigante" data-label="Gigante de piedra" data-emoji="🗿" style="--slot-color:var(--villain-color);--slot-bg:#F5EDFF;--slot-shadow:rgba(155,93,229,0.22)">
-            <div class="check">✓</div><div class="emoji-wrap"><span class="emoji">🗿</span></div><div class="name">Gigante de piedra</div>
+          <div class="card" data-slot="villain" data-val="gigante" data-label="Gigante de piedra" data-emoji="🗿">
+            <div class="check">✓</div><span class="emoji">🗿</span><div class="name">Gigante de piedra</div>
           </div>
         </div>
       </div>
@@ -684,20 +659,20 @@ const IMAGES_ENABLED = true;
           El obstáculo
         </div>
         <div class="cards-scroll">
-          <div class="card" data-slot="obstacle" data-val="laberinto" data-label="Un laberinto" data-emoji="🌀" style="--slot-color:var(--obstacle-color);--slot-bg:#FFF8E5;--slot-shadow:rgba(244,185,66,0.28)">
-            <div class="check">✓</div><div class="emoji-wrap"><span class="emoji">🌀</span></div><div class="name">Un laberinto</div>
+          <div class="card" data-slot="obstacle" data-val="laberinto" data-label="Un laberinto" data-emoji="🌀">
+            <div class="check">✓</div><span class="emoji">🌀</span><div class="name">Un laberinto</div>
           </div>
-          <div class="card" data-slot="obstacle" data-val="tormenta" data-label="Una tormenta" data-emoji="⛈️" style="--slot-color:var(--obstacle-color);--slot-bg:#FFF8E5;--slot-shadow:rgba(244,185,66,0.28)">
-            <div class="check">✓</div><div class="emoji-wrap"><span class="emoji">⛈️</span></div><div class="name">Una tormenta</div>
+          <div class="card" data-slot="obstacle" data-val="tormenta" data-label="Una tormenta" data-emoji="⛈️">
+            <div class="check">✓</div><span class="emoji">⛈️</span><div class="name">Una tormenta</div>
           </div>
-          <div class="card" data-slot="obstacle" data-val="secreto" data-label="Un secreto perdido" data-emoji="🔐" style="--slot-color:var(--obstacle-color);--slot-bg:#FFF8E5;--slot-shadow:rgba(244,185,66,0.28)">
-            <div class="check">✓</div><div class="emoji-wrap"><span class="emoji">🔐</span></div><div class="name">Un secreto</div>
+          <div class="card" data-slot="obstacle" data-val="secreto" data-label="Un secreto perdido" data-emoji="🔐">
+            <div class="check">✓</div><span class="emoji">🔐</span><div class="name">Un secreto</div>
           </div>
-          <div class="card" data-slot="obstacle" data-val="puente" data-label="Un puente roto" data-emoji="🌉" style="--slot-color:var(--obstacle-color);--slot-bg:#FFF8E5;--slot-shadow:rgba(244,185,66,0.28)">
-            <div class="check">✓</div><div class="emoji-wrap"><span class="emoji">🌉</span></div><div class="name">Puente roto</div>
+          <div class="card" data-slot="obstacle" data-val="puente" data-label="Un puente roto" data-emoji="🌉">
+            <div class="check">✓</div><span class="emoji">🌉</span><div class="name">Puente roto</div>
           </div>
-          <div class="card" data-slot="obstacle" data-val="mar" data-label="Un mar helado" data-emoji="🌊" style="--slot-color:var(--obstacle-color);--slot-bg:#FFF8E5;--slot-shadow:rgba(244,185,66,0.28)">
-            <div class="check">✓</div><div class="emoji-wrap"><span class="emoji">🌊</span></div><div class="name">Mar helado</div>
+          <div class="card" data-slot="obstacle" data-val="mar" data-label="Un mar helado" data-emoji="🌊">
+            <div class="check">✓</div><span class="emoji">🌊</span><div class="name">Mar helado</div>
           </div>
         </div>
       </div>
@@ -708,20 +683,20 @@ const IMAGES_ENABLED = true;
           El final es sobre...
         </div>
         <div class="cards-scroll">
-          <div class="card" data-slot="outcome" data-val="amistad" data-label="La amistad" data-emoji="🤝" style="--slot-color:var(--outcome-color);--slot-bg:#EDFFF3;--slot-shadow:rgba(45,198,83,0.22)">
-            <div class="check">✓</div><div class="emoji-wrap"><span class="emoji">🤝</span></div><div class="name">La amistad</div>
+          <div class="card" data-slot="outcome" data-val="amistad" data-label="La amistad" data-emoji="🤝">
+            <div class="check">✓</div><span class="emoji">🤝</span><div class="name">La amistad</div>
           </div>
-          <div class="card" data-slot="outcome" data-val="valentia" data-label="La valentía" data-emoji="💪" style="--slot-color:var(--outcome-color);--slot-bg:#EDFFF3;--slot-shadow:rgba(45,198,83,0.22)">
-            <div class="check">✓</div><div class="emoji-wrap"><span class="emoji">💪</span></div><div class="name">La valentía</div>
+          <div class="card" data-slot="outcome" data-val="valentia" data-label="La valentía" data-emoji="💪">
+            <div class="check">✓</div><span class="emoji">💪</span><div class="name">La valentía</div>
           </div>
-          <div class="card" data-slot="outcome" data-val="astucia" data-label="La astucia" data-emoji="💡" style="--slot-color:var(--outcome-color);--slot-bg:#EDFFF3;--slot-shadow:rgba(45,198,83,0.22)">
-            <div class="check">✓</div><div class="emoji-wrap"><span class="emoji">💡</span></div><div class="name">La astucia</div>
+          <div class="card" data-slot="outcome" data-val="astucia" data-label="La astucia" data-emoji="💡">
+            <div class="check">✓</div><span class="emoji">💡</span><div class="name">La astucia</div>
           </div>
-          <div class="card" data-slot="outcome" data-val="sacrificio" data-label="El sacrificio" data-emoji="🌟" style="--slot-color:var(--outcome-color);--slot-bg:#EDFFF3;--slot-shadow:rgba(45,198,83,0.22)">
-            <div class="check">✓</div><div class="emoji-wrap"><span class="emoji">🌟</span></div><div class="name">El sacrificio</div>
+          <div class="card" data-slot="outcome" data-val="sacrificio" data-label="El sacrificio" data-emoji="🌟">
+            <div class="check">✓</div><span class="emoji">🌟</span><div class="name">El sacrificio</div>
           </div>
-          <div class="card" data-slot="outcome" data-val="perdon" data-label="El perdón" data-emoji="🕊️" style="--slot-color:var(--outcome-color);--slot-bg:#EDFFF3;--slot-shadow:rgba(45,198,83,0.22)">
-            <div class="check">✓</div><div class="emoji-wrap"><span class="emoji">🕊️</span></div><div class="name">El perdón</div>
+          <div class="card" data-slot="outcome" data-val="perdon" data-label="El perdón" data-emoji="🕊️">
+            <div class="check">✓</div><span class="emoji">🕊️</span><div class="name">El perdón</div>
           </div>
         </div>
       </div>
@@ -774,19 +749,19 @@ const IMAGES_ENABLED = true;
     <div class="end-msg">Leíste <strong id="pages-read">6</strong> páginas completas. ¡Eso es increíble! ¿Qué querés hacer ahora?</div>
     <div class="end-actions">
       <div class="end-card" id="btn-new-story" style="cursor:pointer">
-        <div class="ec-ico">✨</div><div class="ec-lbl">Nueva historia</div>
+        <div class="ec-ico">🔄</div><div class="ec-lbl">Nueva historia</div>
       </div>
-      <div class="end-card" id="btn-reread" style="cursor:pointer">
-        <div class="ec-ico">📖</div><div class="ec-lbl">Volver a leer</div>
+      <div class="end-card">
+        <div class="ec-ico">🖨️</div><div class="ec-lbl">Imprimir PDF</div>
       </div>
-      <div class="end-card" id="btn-share" style="cursor:pointer">
-        <div class="ec-ico">💌</div><div class="ec-lbl">Compartir</div>
+      <div class="end-card">
+        <div class="ec-ico">🔗</div><div class="ec-lbl">Compartir</div>
       </div>
-      <div class="end-card" id="btn-save" style="cursor:pointer">
+      <div class="end-card">
         <div class="ec-ico">💾</div><div class="ec-lbl">Guardar</div>
       </div>
     </div>
-    <button class="cta" id="btn-play-again">🔄 ¡Otra aventura!</button>
+    <button class="cta" id="btn-play-again">✨ ¡Otra aventura!</button>
   </div>
 </div>
 
@@ -867,14 +842,13 @@ async function startGeneration() {
     // Mostramos el reader de inmediato — el usuario ya puede leer
     markStepDone(steps[3]);
     bar.style.width = '100%';
-    await new Promise(r => setTimeout(r, 300));
     currentPage = 0;
     showScreen('reader');
     showSwipeHint();
 
-    // Las imágenes se generan en background mientras el usuario lee
+    // Las imágenes se generan en background, cada una aparece cuando está lista
     if (IMAGES_ENABLED) {
-      generateImages(story); // sin await — no bloqueamos
+      generateImages(story); // sin await intencional
     }
 
   } catch (err) {
@@ -1131,80 +1105,6 @@ function resetApp() {
 
 document.getElementById('btn-play-again').addEventListener('click', resetApp);
 document.getElementById('btn-new-story').addEventListener('click', resetApp);
-
-// Volver a leer
-document.getElementById('btn-reread').addEventListener('click', () => {
-  currentPage = 0;
-  showScreen('reader');
-  goToPage(0);
-});
-
-// Compartir — Web Share API con fallback a copiar URL
-document.getElementById('btn-share').addEventListener('click', async () => {
-  const title = document.getElementById('story-title').textContent;
-  const shareData = {
-    title: 'CuentaCuentos — ' + title,
-    text: '¡Mirá el cuento que creé con CuentaCuentos! 📖✨',
-    url: window.location.href
-  };
-  try {
-    if (navigator.share) {
-      await navigator.share(shareData);
-    } else {
-      await navigator.clipboard.writeText(window.location.href);
-      showToast('¡Link copiado al portapapeles! 📋');
-    }
-  } catch (e) {
-    if (e.name !== 'AbortError') showToast('No se pudo compartir');
-  }
-});
-
-// Guardar — descarga las páginas como texto plano
-document.getElementById('btn-save').addEventListener('click', () => {
-  if (!storyPages.length) return;
-  const title = document.getElementById('story-title').textContent;
-  const content = [
-    title.toUpperCase(),
-    '─'.repeat(40),
-    '',
-    ...storyPages.map(p => {
-      const text = p.text.replace(/<[^>]+>/g, ''); // quitar HTML tags
-      return `Página ${p.page}\n${text}\n`;
-    })
-  ].join('\n');
-
-  const blob = new Blob([content], { type: 'text/plain;charset=utf-8' });
-  const url = URL.createObjectURL(blob);
-  const a = document.createElement('a');
-  a.href = url;
-  a.download = title.replace(/[^a-zA-ZáéíóúÁÉÍÓÚñÑ0-9 ]/g, '').trim() + '.txt';
-  a.click();
-  URL.revokeObjectURL(url);
-  showToast('¡Cuento guardado! 💾');
-});
-
-// Toast helper
-function showToast(msg) {
-  let t = document.getElementById('app-toast');
-  if (!t) {
-    t = document.createElement('div');
-    t.id = 'app-toast';
-    t.style.cssText = `
-      position:fixed; bottom:28px; left:50%; transform:translateX(-50%);
-      background:rgba(26,18,8,0.92); color:#fff;
-      padding:10px 20px; border-radius:100px;
-      font-size:13px; font-weight:700;
-      z-index:9999; pointer-events:none;
-      opacity:0; transition:opacity 0.25s ease;
-      white-space:nowrap;
-    `;
-    document.body.appendChild(t);
-  }
-  t.textContent = msg;
-  t.style.opacity = '1';
-  clearTimeout(t._timer);
-  t._timer = setTimeout(() => t.style.opacity = '0', 2200);
-}
 
 document.querySelectorAll('.gen-step-item .step-icon').forEach(ico => ico.dataset.orig = ico.textContent);
 </script>
