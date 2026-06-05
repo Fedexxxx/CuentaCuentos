@@ -141,43 +141,76 @@ const IMAGES_ENABLED = true;
 
   .cards-scroll {
     display: flex; gap: 10px;
-    overflow-x: auto; padding-bottom: 4px;
+    overflow-x: auto; padding-bottom: 6px; padding-top: 4px;
     scrollbar-width: none;
   }
   .cards-scroll::-webkit-scrollbar { display: none; }
 
   .card {
-    flex: 0 0 86px;
+    flex: 0 0 96px;
     background: var(--cream);
-    border: 2px solid transparent;
-    border-radius: var(--radius-sm);
-    padding: 12px 8px 10px;
+    border: 2.5px solid transparent;
+    border-radius: 16px;
+    padding: 0;
     cursor: pointer;
     text-align: center;
-    transition: all 0.18s cubic-bezier(0.34, 1.56, 0.64, 1);
+    transition: all 0.22s cubic-bezier(0.34, 1.56, 0.64, 1);
     user-select: none;
     position: relative;
+    overflow: hidden;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.07);
   }
-  .card:hover { transform: translateY(-2px); border-color: var(--border-strong); }
+  .card:hover {
+    transform: translateY(-4px);
+    border-color: var(--slot-color, var(--border-strong));
+    box-shadow: 0 8px 20px rgba(0,0,0,0.13);
+  }
   .card.selected {
-    transform: translateY(-3px) scale(1.03);
-    background: var(--orange-light);
-    box-shadow: 0 4px 16px rgba(255,107,53,0.2);
+    transform: translateY(-5px) scale(1.04);
+    border-color: var(--slot-color, var(--orange));
+    box-shadow: 0 10px 28px var(--slot-shadow, rgba(255,107,53,0.3));
   }
   .card .check {
-    position: absolute; top: 6px; right: 6px;
-    width: 16px; height: 16px; border-radius: 50%;
-    background: var(--orange); color: #fff;
-    font-size: 9px; display: none;
+    position: absolute; top: 7px; right: 7px;
+    width: 20px; height: 20px; border-radius: 50%;
+    background: var(--slot-color, var(--orange)); color: #fff;
+    font-size: 11px; display: none;
     align-items: center; justify-content: center;
+    box-shadow: 0 2px 6px rgba(0,0,0,0.25);
+    z-index: 2;
   }
   .card.selected .check { display: flex; }
-  .card .emoji { font-size: 28px; display: block; margin-bottom: 6px; }
-  .card .name {
-    font-size: 10px; font-weight: 700;
-    color: var(--ink-soft); line-height: 1.3;
+
+  /* Imagen cuadrada con aspect-ratio fijo */
+  .card .card-img-wrap {
+    width: 100%;
+    aspect-ratio: 1;
+    overflow: hidden;
+    background: var(--slot-bg, #f0ebe4);
+    position: relative;
   }
-  .card.selected .name { color: var(--orange-dark); }
+  .card .card-img-wrap img {
+    width: 100%; height: 100%;
+    object-fit: cover;
+    display: block;
+    transition: transform 0.3s ease;
+  }
+  .card:hover .card-img-wrap img { transform: scale(1.06); }
+  /* Fallback emoji mientras carga o si falla */
+  .card .card-img-wrap .card-emoji-fallback {
+    position: absolute; inset: 0;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 36px;
+  }
+
+  .card .name {
+    font-size: 10px; font-weight: 800;
+    color: var(--ink-soft); line-height: 1.3;
+    padding: 6px 6px 8px;
+    background: white;
+    transition: color 0.2s;
+  }
+  .card.selected .name { color: var(--slot-color, var(--orange-dark)); }
 
   .recipe-area {
     background: var(--cream);
@@ -587,20 +620,30 @@ const IMAGES_ENABLED = true;
           Héroe principal
         </div>
         <div class="cards-scroll">
-          <div class="card" data-slot="hero" data-val="nina" data-label="Niña valiente" data-emoji="👧">
-            <div class="check">✓</div><span class="emoji">👧</span><div class="name">Niña valiente</div>
+          <div class="card" data-slot="hero" data-val="nina" data-label="Niña valiente" data-emoji="👧" style="--slot-color:var(--hero-color);--slot-bg:#FFF0E8;--slot-shadow:rgba(255,107,53,0.28)">
+            <div class="check">✓</div>
+            <div class="card-img-wrap"><div class="card-emoji-fallback">👧</div><img src="/cards/hero-nina.png" alt="Niña valiente" loading="lazy" onerror="this.style.display='none'"></div>
+            <div class="name">Niña valiente</div>
           </div>
-          <div class="card" data-slot="hero" data-val="robot" data-label="Robot curioso" data-emoji="🤖">
-            <div class="check">✓</div><span class="emoji">🤖</span><div class="name">Robot curioso</div>
+          <div class="card" data-slot="hero" data-val="robot" data-label="Robot curioso" data-emoji="🤖" style="--slot-color:var(--hero-color);--slot-bg:#FFF0E8;--slot-shadow:rgba(255,107,53,0.28)">
+            <div class="check">✓</div>
+            <div class="card-img-wrap"><div class="card-emoji-fallback">🤖</div><img src="/cards/hero-robot.png" alt="Robot curioso" loading="lazy" onerror="this.style.display='none'"></div>
+            <div class="name">Robot curioso</div>
           </div>
-          <div class="card" data-slot="hero" data-val="zorro" data-label="Zorro astuto" data-emoji="🦊">
-            <div class="check">✓</div><span class="emoji">🦊</span><div class="name">Zorro astuto</div>
+          <div class="card" data-slot="hero" data-val="zorro" data-label="Zorro astuto" data-emoji="🦊" style="--slot-color:var(--hero-color);--slot-bg:#FFF0E8;--slot-shadow:rgba(255,107,53,0.28)">
+            <div class="check">✓</div>
+            <div class="card-img-wrap"><div class="card-emoji-fallback">🦊</div><img src="/cards/hero-zorro.png" alt="Zorro astuto" loading="lazy" onerror="this.style.display='none'"></div>
+            <div class="name">Zorro astuto</div>
           </div>
-          <div class="card" data-slot="hero" data-val="bruja" data-label="Bruja buena" data-emoji="🧙‍♀️">
-            <div class="check">✓</div><span class="emoji">🧙‍♀️</span><div class="name">Bruja buena</div>
+          <div class="card" data-slot="hero" data-val="bruja" data-label="Bruja buena" data-emoji="🧙‍♀️" style="--slot-color:var(--hero-color);--slot-bg:#FFF0E8;--slot-shadow:rgba(255,107,53,0.28)">
+            <div class="check">✓</div>
+            <div class="card-img-wrap"><div class="card-emoji-fallback">🧙‍♀️</div><img src="/cards/hero-bruja.png" alt="Bruja buena" loading="lazy" onerror="this.style.display='none'"></div>
+            <div class="name">Bruja buena</div>
           </div>
-          <div class="card" data-slot="hero" data-val="explorador" data-label="Explorador" data-emoji="🧭">
-            <div class="check">✓</div><span class="emoji">🧭</span><div class="name">Explorador</div>
+          <div class="card" data-slot="hero" data-val="explorador" data-label="Explorador" data-emoji="🧭" style="--slot-color:var(--hero-color);--slot-bg:#FFF0E8;--slot-shadow:rgba(255,107,53,0.28)">
+            <div class="check">✓</div>
+            <div class="card-img-wrap"><div class="card-emoji-fallback">🧭</div><img src="/cards/hero-explorador.png" alt="Explorador" loading="lazy" onerror="this.style.display='none'"></div>
+            <div class="name">Explorador</div>
           </div>
         </div>
       </div>
@@ -611,20 +654,30 @@ const IMAGES_ENABLED = true;
           Amigo especial
         </div>
         <div class="cards-scroll">
-          <div class="card" data-slot="friend" data-val="dragon" data-label="Dragón torpe" data-emoji="🐉">
-            <div class="check">✓</div><span class="emoji">🐉</span><div class="name">Dragón torpe</div>
+          <div class="card" data-slot="friend" data-val="dragon" data-label="Dragón torpe" data-emoji="🐉" style="--slot-color:var(--friend-color);--slot-bg:#EBF5FF;--slot-shadow:rgba(59,158,255,0.25)">
+            <div class="check">✓</div>
+            <div class="card-img-wrap"><div class="card-emoji-fallback">🐉</div><img src="/cards/friend-dragon.png" alt="Dragón torpe" loading="lazy" onerror="this.style.display='none'"></div>
+            <div class="name">Dragón torpe</div>
           </div>
-          <div class="card" data-slot="friend" data-val="fantasma" data-label="Fantasma tímido" data-emoji="👻">
-            <div class="check">✓</div><span class="emoji">👻</span><div class="name">Fantasma tímido</div>
+          <div class="card" data-slot="friend" data-val="fantasma" data-label="Fantasma tímido" data-emoji="👻" style="--slot-color:var(--friend-color);--slot-bg:#EBF5FF;--slot-shadow:rgba(59,158,255,0.25)">
+            <div class="check">✓</div>
+            <div class="card-img-wrap"><div class="card-emoji-fallback">👻</div><img src="/cards/friend-fantasma.png" alt="Fantasma tímido" loading="lazy" onerror="this.style.display='none'"></div>
+            <div class="name">Fantasma tímido</div>
           </div>
-          <div class="card" data-slot="friend" data-val="anciana" data-label="Anciana sabia" data-emoji="👵">
-            <div class="check">✓</div><span class="emoji">👵</span><div class="name">Anciana sabia</div>
+          <div class="card" data-slot="friend" data-val="anciana" data-label="Anciana sabia" data-emoji="👵" style="--slot-color:var(--friend-color);--slot-bg:#EBF5FF;--slot-shadow:rgba(59,158,255,0.25)">
+            <div class="check">✓</div>
+            <div class="card-img-wrap"><div class="card-emoji-fallback">👵</div><img src="/cards/friend-anciana.png" alt="Anciana sabia" loading="lazy" onerror="this.style.display='none'"></div>
+            <div class="name">Anciana sabia</div>
           </div>
-          <div class="card" data-slot="friend" data-val="pulpo" data-label="Pulpo músico" data-emoji="🐙">
-            <div class="check">✓</div><span class="emoji">🐙</span><div class="name">Pulpo músico</div>
+          <div class="card" data-slot="friend" data-val="pulpo" data-label="Pulpo músico" data-emoji="🐙" style="--slot-color:var(--friend-color);--slot-bg:#EBF5FF;--slot-shadow:rgba(59,158,255,0.25)">
+            <div class="check">✓</div>
+            <div class="card-img-wrap"><div class="card-emoji-fallback">🐙</div><img src="/cards/friend-pulpo.png" alt="Pulpo músico" loading="lazy" onerror="this.style.display='none'"></div>
+            <div class="name">Pulpo músico</div>
           </div>
-          <div class="card" data-slot="friend" data-val="robot2" data-label="Robot pequeño" data-emoji="🦾">
-            <div class="check">✓</div><span class="emoji">🦾</span><div class="name">Robot pequeño</div>
+          <div class="card" data-slot="friend" data-val="robot2" data-label="Robot pequeño" data-emoji="🦾" style="--slot-color:var(--friend-color);--slot-bg:#EBF5FF;--slot-shadow:rgba(59,158,255,0.25)">
+            <div class="check">✓</div>
+            <div class="card-img-wrap"><div class="card-emoji-fallback">🦾</div><img src="/cards/friend-robot2.png" alt="Robot pequeño" loading="lazy" onerror="this.style.display='none'"></div>
+            <div class="name">Robot pequeño</div>
           </div>
         </div>
       </div>
@@ -635,20 +688,30 @@ const IMAGES_ENABLED = true;
           El villano
         </div>
         <div class="cards-scroll">
-          <div class="card" data-slot="villain" data-val="rey-caos" data-label="Rey del caos" data-emoji="🧟">
-            <div class="check">✓</div><span class="emoji">🧟</span><div class="name">Rey del caos</div>
+          <div class="card" data-slot="villain" data-val="rey-caos" data-label="Rey del caos" data-emoji="🧟" style="--slot-color:var(--villain-color);--slot-bg:#F5EDFF;--slot-shadow:rgba(155,93,229,0.25)">
+            <div class="check">✓</div>
+            <div class="card-img-wrap"><div class="card-emoji-fallback">🧟</div><img src="/cards/villain-rey.png" alt="Rey del caos" loading="lazy" onerror="this.style.display='none'"></div>
+            <div class="name">Rey del caos</div>
           </div>
-          <div class="card" data-slot="villain" data-val="maquina" data-label="Máquina del olvido" data-emoji="⚙️">
-            <div class="check">✓</div><span class="emoji">⚙️</span><div class="name">Máq. del olvido</div>
+          <div class="card" data-slot="villain" data-val="maquina" data-label="Máquina del olvido" data-emoji="⚙️" style="--slot-color:var(--villain-color);--slot-bg:#F5EDFF;--slot-shadow:rgba(155,93,229,0.25)">
+            <div class="check">✓</div>
+            <div class="card-img-wrap"><div class="card-emoji-fallback">⚙️</div><img src="/cards/villain-maquina.png" alt="Máquina del olvido" loading="lazy" onerror="this.style.display='none'"></div>
+            <div class="name">Máq. del olvido</div>
           </div>
-          <div class="card" data-slot="villain" data-val="bruja-tiempo" data-label="Bruja del tiempo" data-emoji="🕰️">
-            <div class="check">✓</div><span class="emoji">🕰️</span><div class="name">Bruja del tiempo</div>
+          <div class="card" data-slot="villain" data-val="bruja-tiempo" data-label="Bruja del tiempo" data-emoji="🕰️" style="--slot-color:var(--villain-color);--slot-bg:#F5EDFF;--slot-shadow:rgba(155,93,229,0.25)">
+            <div class="check">✓</div>
+            <div class="card-img-wrap"><div class="card-emoji-fallback">🕰️</div><img src="/cards/villain-bruja.png" alt="Bruja del tiempo" loading="lazy" onerror="this.style.display='none'"></div>
+            <div class="name">Bruja del tiempo</div>
           </div>
-          <div class="card" data-slot="villain" data-val="sombra" data-label="La gran sombra" data-emoji="🌑">
-            <div class="check">✓</div><span class="emoji">🌑</span><div class="name">La gran sombra</div>
+          <div class="card" data-slot="villain" data-val="sombra" data-label="La gran sombra" data-emoji="🌑" style="--slot-color:var(--villain-color);--slot-bg:#F5EDFF;--slot-shadow:rgba(155,93,229,0.25)">
+            <div class="check">✓</div>
+            <div class="card-img-wrap"><div class="card-emoji-fallback">🌑</div><img src="/cards/villain-sombra.png" alt="La gran sombra" loading="lazy" onerror="this.style.display='none'"></div>
+            <div class="name">La gran sombra</div>
           </div>
-          <div class="card" data-slot="villain" data-val="gigante" data-label="Gigante de piedra" data-emoji="🗿">
-            <div class="check">✓</div><span class="emoji">🗿</span><div class="name">Gigante de piedra</div>
+          <div class="card" data-slot="villain" data-val="gigante" data-label="Gigante de piedra" data-emoji="🗿" style="--slot-color:var(--villain-color);--slot-bg:#F5EDFF;--slot-shadow:rgba(155,93,229,0.25)">
+            <div class="check">✓</div>
+            <div class="card-img-wrap"><div class="card-emoji-fallback">🗿</div><img src="/cards/villain-gigante.png" alt="Gigante de piedra" loading="lazy" onerror="this.style.display='none'"></div>
+            <div class="name">Gigante de piedra</div>
           </div>
         </div>
       </div>
@@ -659,20 +722,30 @@ const IMAGES_ENABLED = true;
           El obstáculo
         </div>
         <div class="cards-scroll">
-          <div class="card" data-slot="obstacle" data-val="laberinto" data-label="Un laberinto" data-emoji="🌀">
-            <div class="check">✓</div><span class="emoji">🌀</span><div class="name">Un laberinto</div>
+          <div class="card" data-slot="obstacle" data-val="laberinto" data-label="Un laberinto" data-emoji="🌀" style="--slot-color:var(--obstacle-color);--slot-bg:#FFF8E5;--slot-shadow:rgba(244,185,66,0.3)">
+            <div class="check">✓</div>
+            <div class="card-img-wrap"><div class="card-emoji-fallback">🌀</div><img src="/cards/obstacle-laberinto.png" alt="Un laberinto" loading="lazy" onerror="this.style.display='none'"></div>
+            <div class="name">Un laberinto</div>
           </div>
-          <div class="card" data-slot="obstacle" data-val="tormenta" data-label="Una tormenta" data-emoji="⛈️">
-            <div class="check">✓</div><span class="emoji">⛈️</span><div class="name">Una tormenta</div>
+          <div class="card" data-slot="obstacle" data-val="tormenta" data-label="Una tormenta" data-emoji="⛈️" style="--slot-color:var(--obstacle-color);--slot-bg:#FFF8E5;--slot-shadow:rgba(244,185,66,0.3)">
+            <div class="check">✓</div>
+            <div class="card-img-wrap"><div class="card-emoji-fallback">⛈️</div><img src="/cards/obstacle-tormenta.png" alt="Una tormenta" loading="lazy" onerror="this.style.display='none'"></div>
+            <div class="name">Una tormenta</div>
           </div>
-          <div class="card" data-slot="obstacle" data-val="secreto" data-label="Un secreto perdido" data-emoji="🔐">
-            <div class="check">✓</div><span class="emoji">🔐</span><div class="name">Un secreto</div>
+          <div class="card" data-slot="obstacle" data-val="secreto" data-label="Un secreto perdido" data-emoji="🔐" style="--slot-color:var(--obstacle-color);--slot-bg:#FFF8E5;--slot-shadow:rgba(244,185,66,0.3)">
+            <div class="check">✓</div>
+            <div class="card-img-wrap"><div class="card-emoji-fallback">🔐</div><img src="/cards/obstacle-secreto.png" alt="Un secreto" loading="lazy" onerror="this.style.display='none'"></div>
+            <div class="name">Un secreto</div>
           </div>
-          <div class="card" data-slot="obstacle" data-val="puente" data-label="Un puente roto" data-emoji="🌉">
-            <div class="check">✓</div><span class="emoji">🌉</span><div class="name">Puente roto</div>
+          <div class="card" data-slot="obstacle" data-val="puente" data-label="Un puente roto" data-emoji="🌉" style="--slot-color:var(--obstacle-color);--slot-bg:#FFF8E5;--slot-shadow:rgba(244,185,66,0.3)">
+            <div class="check">✓</div>
+            <div class="card-img-wrap"><div class="card-emoji-fallback">🌉</div><img src="/cards/obstacle-puente.png" alt="Puente roto" loading="lazy" onerror="this.style.display='none'"></div>
+            <div class="name">Puente roto</div>
           </div>
-          <div class="card" data-slot="obstacle" data-val="mar" data-label="Un mar helado" data-emoji="🌊">
-            <div class="check">✓</div><span class="emoji">🌊</span><div class="name">Mar helado</div>
+          <div class="card" data-slot="obstacle" data-val="mar" data-label="Un mar helado" data-emoji="🌊" style="--slot-color:var(--obstacle-color);--slot-bg:#FFF8E5;--slot-shadow:rgba(244,185,66,0.3)">
+            <div class="check">✓</div>
+            <div class="card-img-wrap"><div class="card-emoji-fallback">🌊</div><img src="/cards/obstacle-mar.png" alt="Mar helado" loading="lazy" onerror="this.style.display='none'"></div>
+            <div class="name">Mar helado</div>
           </div>
         </div>
       </div>
@@ -683,20 +756,30 @@ const IMAGES_ENABLED = true;
           El final es sobre...
         </div>
         <div class="cards-scroll">
-          <div class="card" data-slot="outcome" data-val="amistad" data-label="La amistad" data-emoji="🤝">
-            <div class="check">✓</div><span class="emoji">🤝</span><div class="name">La amistad</div>
+          <div class="card" data-slot="outcome" data-val="amistad" data-label="La amistad" data-emoji="🤝" style="--slot-color:var(--outcome-color);--slot-bg:#EDFFF3;--slot-shadow:rgba(45,198,83,0.25)">
+            <div class="check">✓</div>
+            <div class="card-img-wrap"><div class="card-emoji-fallback">🤝</div><img src="/cards/outcome-amistad.png" alt="La amistad" loading="lazy" onerror="this.style.display='none'"></div>
+            <div class="name">La amistad</div>
           </div>
-          <div class="card" data-slot="outcome" data-val="valentia" data-label="La valentía" data-emoji="💪">
-            <div class="check">✓</div><span class="emoji">💪</span><div class="name">La valentía</div>
+          <div class="card" data-slot="outcome" data-val="valentia" data-label="La valentía" data-emoji="💪" style="--slot-color:var(--outcome-color);--slot-bg:#EDFFF3;--slot-shadow:rgba(45,198,83,0.25)">
+            <div class="check">✓</div>
+            <div class="card-img-wrap"><div class="card-emoji-fallback">💪</div><img src="/cards/outcome-valentia.png" alt="La valentía" loading="lazy" onerror="this.style.display='none'"></div>
+            <div class="name">La valentía</div>
           </div>
-          <div class="card" data-slot="outcome" data-val="astucia" data-label="La astucia" data-emoji="💡">
-            <div class="check">✓</div><span class="emoji">💡</span><div class="name">La astucia</div>
+          <div class="card" data-slot="outcome" data-val="astucia" data-label="La astucia" data-emoji="💡" style="--slot-color:var(--outcome-color);--slot-bg:#EDFFF3;--slot-shadow:rgba(45,198,83,0.25)">
+            <div class="check">✓</div>
+            <div class="card-img-wrap"><div class="card-emoji-fallback">💡</div><img src="/cards/outcome-astucia.png" alt="La astucia" loading="lazy" onerror="this.style.display='none'"></div>
+            <div class="name">La astucia</div>
           </div>
-          <div class="card" data-slot="outcome" data-val="sacrificio" data-label="El sacrificio" data-emoji="🌟">
-            <div class="check">✓</div><span class="emoji">🌟</span><div class="name">El sacrificio</div>
+          <div class="card" data-slot="outcome" data-val="sacrificio" data-label="El sacrificio" data-emoji="🌟" style="--slot-color:var(--outcome-color);--slot-bg:#EDFFF3;--slot-shadow:rgba(45,198,83,0.25)">
+            <div class="check">✓</div>
+            <div class="card-img-wrap"><div class="card-emoji-fallback">🌟</div><img src="/cards/outcome-sacrificio.png" alt="El sacrificio" loading="lazy" onerror="this.style.display='none'"></div>
+            <div class="name">El sacrificio</div>
           </div>
-          <div class="card" data-slot="outcome" data-val="perdon" data-label="El perdón" data-emoji="🕊️">
-            <div class="check">✓</div><span class="emoji">🕊️</span><div class="name">El perdón</div>
+          <div class="card" data-slot="outcome" data-val="perdon" data-label="El perdón" data-emoji="🕊️" style="--slot-color:var(--outcome-color);--slot-bg:#EDFFF3;--slot-shadow:rgba(45,198,83,0.25)">
+            <div class="check">✓</div>
+            <div class="card-img-wrap"><div class="card-emoji-fallback">🕊️</div><img src="/cards/outcome-perdon.png" alt="El perdón" loading="lazy" onerror="this.style.display='none'"></div>
+            <div class="name">El perdón</div>
           </div>
         </div>
       </div>
