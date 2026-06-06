@@ -201,6 +201,16 @@ const IMAGES_ENABLED = true;
     position: absolute; inset: 0;
     display: flex; align-items: center; justify-content: center;
     font-size: 36px;
+    transition: opacity 0.3s ease;
+  }
+  .card .card-img-wrap img.img-loaded ~ .card-emoji-fallback { display: none; }
+  .card .card-img-wrap img {
+    width: 100%; height: 100%;
+    object-fit: cover;
+    display: block;
+    transition: transform 0.3s ease;
+    position: relative;
+    z-index: 1;
   }
 
   .card .name {
@@ -861,6 +871,11 @@ function showScreen(id) {
   document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
   document.getElementById('screen-' + id).classList.add('active');
 }
+
+document.querySelectorAll('.card-img-wrap img').forEach(img => {
+  if (img.complete) img.classList.add('img-loaded');
+  else img.addEventListener('load', () => img.classList.add('img-loaded'));
+});
 
 document.querySelectorAll('.card').forEach(card => {
   card.addEventListener('click', () => {
