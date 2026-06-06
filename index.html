@@ -268,62 +268,139 @@ const IMAGES_ENABLED = true;
     text-align: center;
     padding: 40px 28px;
     gap: 0;
-    background: var(--cream);
+    background: linear-gradient(160deg, #FFF8F0 0%, #FFF0E8 100%);
+    position: relative;
+    overflow: hidden;
+  }
+
+  /* Partículas flotantes de fondo */
+  #screen-gen::before {
+    content: '✨ 📖 🌟 🎨 ⭐ 🖌️ 💫 📝';
+    position: absolute;
+    inset: 0;
+    font-size: 20px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    letter-spacing: 32px;
+    opacity: 0.07;
+    animation: bg-drift 8s ease-in-out infinite alternate;
+    pointer-events: none;
+    word-break: break-all;
+    line-height: 2.5;
+    padding: 20px;
+  }
+  @keyframes bg-drift {
+    0% { transform: translateY(0) rotate(-1deg); }
+    100% { transform: translateY(-12px) rotate(1deg); }
   }
 
   .gen-orb {
-    width: 100px; height: 100px;
+    width: 110px; height: 110px;
     border-radius: 50%;
     background: var(--orange-light);
     display: flex; align-items: center; justify-content: center;
-    font-size: 48px;
-    margin-bottom: 24px;
-    animation: orb-pulse 2s ease-in-out infinite;
+    font-size: 52px;
+    margin-bottom: 20px;
+    position: relative;
+    animation: orb-pulse 2.2s ease-in-out infinite;
+  }
+  /* Anillos que se expanden */
+  .gen-orb::before, .gen-orb::after {
+    content: '';
+    position: absolute;
+    border-radius: 50%;
+    border: 2px solid rgba(255,107,53,0.3);
+    animation: ring-expand 2.2s ease-out infinite;
+  }
+  .gen-orb::before { width: 100%; height: 100%; animation-delay: 0s; }
+  .gen-orb::after  { width: 100%; height: 100%; animation-delay: 0.7s; }
+
+  @keyframes ring-expand {
+    0%   { transform: scale(1);   opacity: 0.6; }
+    100% { transform: scale(2.2); opacity: 0; }
   }
   @keyframes orb-pulse {
-    0%,100% { transform: scale(1); box-shadow: 0 0 0 0 rgba(255,107,53,0.2); }
-    50% { transform: scale(1.06); box-shadow: 0 0 0 16px rgba(255,107,53,0); }
+    0%,100% { transform: scale(1);    box-shadow: 0 4px 20px rgba(255,107,53,0.15); }
+    50%      { transform: scale(1.07); box-shadow: 0 8px 32px rgba(255,107,53,0.3); }
   }
 
   .gen-title {
     font-family: 'Fredoka One', cursive;
     font-size: 22px; color: var(--ink);
-    margin-bottom: 8px;
+    margin-bottom: 6px;
+    animation: title-breathe 3s ease-in-out infinite;
   }
+  @keyframes title-breathe {
+    0%,100% { opacity: 1; }
+    50%      { opacity: 0.75; }
+  }
+
   .gen-subtitle {
     font-size: 13px; color: var(--ink-muted);
     line-height: 1.6; max-width: 280px;
     margin-bottom: 28px;
+    min-height: 42px;
   }
 
   .gen-steps { width: 100%; text-align: left; margin-bottom: 16px; }
   .gen-step-item {
     display: flex; align-items: center; gap: 10px;
-    padding: 8px 12px; border-radius: 10px;
+    padding: 9px 14px; border-radius: 12px;
     font-size: 13px; font-weight: 600;
     color: var(--ink-muted);
-    transition: all 0.3s;
+    transition: all 0.4s cubic-bezier(0.34,1.56,0.64,1);
     margin-bottom: 4px;
   }
   .gen-step-item.active {
     background: var(--orange-light);
     color: var(--orange-dark);
+    transform: translateX(4px);
+    box-shadow: 0 2px 12px rgba(255,107,53,0.15);
+  }
+  .gen-step-item.active .step-icon {
+    animation: icon-wiggle 0.6s ease-in-out infinite alternate;
+  }
+  @keyframes icon-wiggle {
+    0%   { transform: rotate(-8deg) scale(1.1); }
+    100% { transform: rotate(8deg)  scale(1.2); }
   }
   .gen-step-item.done { color: var(--outcome-color); }
-  .step-icon { font-size: 18px; width: 24px; text-align: center; }
+  .step-icon { font-size: 18px; width: 24px; text-align: center; transition: transform 0.3s; }
 
   .gen-bar-track {
-    width: 100%; height: 6px;
+    width: 100%; height: 8px;
     background: var(--border);
-    border-radius: 3px; overflow: hidden;
-    margin-top: 8px;
+    border-radius: 4px; overflow: hidden;
+    margin-top: 10px;
   }
   .gen-bar-fill {
     height: 100%;
-    background: linear-gradient(90deg, var(--orange), #FF9A5C);
-    border-radius: 3px;
+    background: linear-gradient(90deg, var(--orange), #FF9A5C, #FFD19A);
+    background-size: 200% 100%;
+    border-radius: 4px;
     width: 0%;
-    transition: width 0.6s ease;
+    transition: width 0.7s cubic-bezier(0.4,0,0.2,1);
+    animation: bar-shimmer 1.8s linear infinite;
+  }
+  @keyframes bar-shimmer {
+    0%   { background-position: 100% 0; }
+    100% { background-position: -100% 0; }
+  }
+
+  .gen-fun-fact {
+    font-size: 11px;
+    color: var(--ink-muted);
+    font-style: italic;
+    margin-top: 14px;
+    min-height: 32px;
+    line-height: 1.5;
+    max-width: 260px;
+    opacity: 0;
+    animation: fact-fade 0.5s ease forwards;
+  }
+  @keyframes fact-fade {
+    to { opacity: 1; }
   }
 
   .gen-error {
@@ -808,7 +885,7 @@ const IMAGES_ENABLED = true;
   <!-- ── SCREEN 2: GENERATING ── -->
   <div id="screen-gen" class="screen">
     <div class="gen-orb" id="gen-orb">✨</div>
-    <div class="gen-title">Escribiendo tu cuento...</div>
+    <div class="gen-title" id="gen-title">Escribiendo tu cuento...</div>
     <div class="gen-subtitle" id="gen-subtitle">Preparando una aventura increíble</div>
     <div class="gen-steps">
       <div class="gen-step-item" id="step-0"><span class="step-icon">🌍</span>Construyendo el mundo</div>
@@ -819,6 +896,7 @@ const IMAGES_ENABLED = true;
     <div class="gen-bar-track">
       <div class="gen-bar-fill" id="gen-bar"></div>
     </div>
+    <div class="gen-fun-fact" id="gen-fun-fact"></div>
     <div class="img-progress-row" id="img-progress-row" style="display:none"></div>
     <div class="gen-error" id="gen-error"></div>
   </div>
@@ -915,6 +993,8 @@ async function startGeneration() {
   const bar = document.getElementById('gen-bar');
   let stepIdx = 0;
 
+  startFunFacts();
+
   const stepTimer = setInterval(() => {
     if (stepIdx < 3) {
       if (stepIdx > 0) markStepDone(steps[stepIdx - 1]);
@@ -934,26 +1014,29 @@ async function startGeneration() {
     for (let i = 0; i < 3; i++) markStepDone(steps[i]);
     steps[3].classList.add('active');
     bar.style.width = '60%';
+    document.getElementById('gen-title').textContent = '¡Historia lista! Dibujando...';
+    document.getElementById('gen-subtitle').textContent = 'Las ilustraciones se están pintando...';
 
     storyPages = story.pages;
     currentStory = story;
-    Object.keys(imageRequested).forEach(k => delete imageRequested[k]);
     renderReader(story.title, story.pages);
 
-    // Mostramos el reader de inmediato — el usuario ya puede leer
+    // Mostramos el reader de inmediato
     markStepDone(steps[3]);
     bar.style.width = '100%';
+    stopFunFacts();
     currentPage = 0;
     showScreen('reader');
     showSwipeHint();
 
-    // Las imágenes se generan on-demand: página actual + prefetch de la siguiente
+    // Las 6 imágenes se generan en paralelo en background
     if (IMAGES_ENABLED) {
-      onPageChanged(story, 0);
+      generateImages(story);
     }
 
   } catch (err) {
     clearInterval(stepTimer);
+    stopFunFacts();
     bar.style.width = '0%';
     const errEl = document.getElementById('gen-error');
     errEl.style.display = 'block';
@@ -1015,21 +1098,80 @@ Reglas del cuento:
   return JSON.parse(jsonMatch[0]);
 }
 
-// Registro de qué imágenes ya fueron pedidas (evita duplicar llamadas)
-const imageRequested = {};
+// ── Frases rotativas durante la espera ──────────────────────────────────────
+const FUN_FACTS = [
+  '💡 Los mejores cuentos nacen de la imaginación más disparatada...',
+  '🌍 Cada historia crea un mundo nuevo desde cero.',
+  '✍️ Se necesitan exactamente 6 páginas para una aventura perfecta.',
+  '🎨 Las ilustraciones se pintan una a una, con mucho cuidado.',
+  '⭐ Los héroes más memorables siempre tienen un amigo que los ayuda.',
+  '📚 Los villanos más interesantes también tienen su propia historia.',
+  '🌈 Cada color de la ilustración está pensado para evocar emociones.',
+  '🖌️ Un buen cuento tiene inicio, nudo y desenlace — ¡y mucha emoción!',
+];
 
-function requestImageForPage(story, index) {
-  if (imageRequested[index]) return;
-  if (!story.pages[index]) return;
-  imageRequested[index] = true;
-  generateOneImage(story.pages[index], index);
+// Frases contextuales para el shimmer, indexadas por personaje elegido
+const SHIMMER_TEXTS = {
+  dragon:      ['Despertando al dragón...', 'El dragón abre sus alas...', 'Pintando escamas verdes...'],
+  fantasma:    ['El fantasma aparece...', 'Dibujando entre neblinas...', 'Trazando sombras suaves...'],
+  zorro:       ['El zorro afila su astucia...', 'Pintando pelaje naranja...', 'El zorro espía la escena...'],
+  bruja:       ['La varita hace su magia...', 'Mezclando colores mágicos...', 'El sombrero ya está listo...'],
+  explorador:  ['El mapa toma forma...', 'Pintando tierras lejanas...', 'La brújula apunta al norte...'],
+  robot:       ['Los engranajes giran...', 'Compilando colores...', 'El robot procesa la escena...'],
+  nina:        ['La heroína entra en escena...', 'Pintando ojos valientes...', 'La aventura comienza...'],
+  pulpo:       ['El pulpo afina sus instrumentos...', 'Ocho brazos, ocho pinceles...', 'La música toma forma...'],
+  sombra:      ['La oscuridad se dibuja...', 'Trazando siluetas misteriosas...', 'Los ojos brillan en la penumbra...'],
+  laberinto:   ['El laberinto se construye...', 'Los pasillos se entrelazan...', 'Hay una salida... en algún lugar...'],
+  tormenta:    ['Los nubarrones se forman...', 'El rayo busca su camino...', 'La lluvia está por caer...'],
+  default:     ['Pintando la escena...', 'Los colores toman forma...', 'La magia visual está en proceso...'],
+};
+
+function getShimmerText(selections, pageIndex) {
+  // Elige el personaje más relevante según la página
+  const priority = [
+    pageIndex <= 1 ? selections.hero?.val : null,
+    pageIndex === 1 ? selections.friend?.val : null,
+    pageIndex >= 2 ? selections.villain?.val : null,
+    pageIndex >= 3 ? selections.obstacle?.val : null,
+  ].filter(Boolean);
+
+  for (const key of priority) {
+    const key2 = key.replace('robot2','robot').replace('rey-caos','sombra').replace('bruja-tiempo','bruja').replace('gigante','sombra').replace('maquina','robot').replace('puente','laberinto').replace('secreto','laberinto').replace('mar','tormenta').replace('anciana','explorador');
+    if (SHIMMER_TEXTS[key2]) {
+      const arr = SHIMMER_TEXTS[key2];
+      return arr[pageIndex % arr.length];
+    }
+    if (SHIMMER_TEXTS[key]) {
+      const arr = SHIMMER_TEXTS[key];
+      return arr[pageIndex % arr.length];
+    }
+  }
+  const def = SHIMMER_TEXTS.default;
+  return def[pageIndex % def.length];
 }
 
-function onPageChanged(story, pageIndex) {
-  // Genera la página actual si no fue pedida
-  requestImageForPage(story, pageIndex);
-  // Pre-carga la siguiente
-  requestImageForPage(story, pageIndex + 1);
+let funFactTimer = null;
+function startFunFacts() {
+  const el = document.getElementById('gen-fun-fact');
+  let i = Math.floor(Math.random() * FUN_FACTS.length);
+  function showNext() {
+    el.style.animation = 'none';
+    el.textContent = FUN_FACTS[i % FUN_FACTS.length];
+    el.style.animation = 'fact-fade 0.5s ease forwards';
+    i++;
+  }
+  showNext();
+  funFactTimer = setInterval(showNext, 3500);
+}
+function stopFunFacts() {
+  clearInterval(funFactTimer);
+  document.getElementById('gen-fun-fact').textContent = '';
+}
+
+async function generateImages(story) {
+  const pages = story.pages;
+  const imagePromises = pages.map((page, i) => generateOneImage(page, i));
+  await Promise.allSettled(imagePromises);
 }
 
 async function generateOneImage(page, index) {
@@ -1104,7 +1246,7 @@ function renderReader(title, pages) {
       <div class="page-illustration bg-${i % 6}">
         <div class="illus-shimmer" id="page-shimmer-${i}">
           <div class="shimmer-emoji">${p.emoji}</div>
-          <div class="shimmer-text">Dibujando...</div>
+          <div class="shimmer-text" id="shimmer-txt-${i}">${getShimmerText(selections, i)}</div>
         </div>
         <img class="illus-img" id="page-img-${i}" alt="Ilustración de la página ${i + 1}" />
       </div>
@@ -1155,10 +1297,6 @@ function goToPage(n) {
     setTimeout(() => { nextEl.style.transform = ''; }, 10);
   }
   updateReaderNav();
-  // Genera imagen de página actual + prefetch siguiente
-  if (IMAGES_ENABLED && currentStory) {
-    onPageChanged(currentStory, currentPage);
-  }
 }
 
 function updateReaderNav() {
@@ -1209,7 +1347,7 @@ function resetApp() {
   storyPages = [];
   currentPage = 0;
   currentStory = null;
-  Object.keys(imageRequested).forEach(k => delete imageRequested[k]);
+  document.getElementById('gen-title').textContent = 'Escribiendo tu cuento...';
   showScreen('builder');
 }
 
