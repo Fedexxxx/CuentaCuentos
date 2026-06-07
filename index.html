@@ -915,6 +915,7 @@ async function startGeneration() {
   const steps = document.querySelectorAll('.gen-step-item');
   const bar = document.getElementById('gen-bar');
   let stepIdx = 0;
+  let readerShown = false;
 
   startFunFacts();
 
@@ -930,29 +931,65 @@ async function startGeneration() {
   document.getElementById('gen-subtitle').textContent =
     `${selections.hero.emoji} ${selections.hero.label} y ${selections.friend.emoji} ${selections.friend.label} están a punto de vivir algo increíble...`;
 
+  // Páginas acumuladas mientras llegan del stream
+  const pagesAccumulated = [];
+
+  // Callback: se llama en cuanto cada página esté completa
+  function onPageReady(page, index) {
+    pagesAccumulated.push(page);
+
+    // En cuanto llega la primera página, mostramos el reader
+    if (!readerShown) {
+      readerShown = true;
+      clearInterval(stepTimer);
+      for (let i = 0; i < 3; i++) markStepDone(steps[i]);
+      steps[3].classList.add('active');
+      bar.style.width = '60%';
+      stopFunFacts();
+
+      // Renderizamos con placeholders para las páginas que faltan
+      const placeholders = Array.from({ length: 6 }, (_, i) =>
+        pagesAccumulated[i] || { page: i + 1, emoji: '✨', text: '', image_prompt: '' }
+      );
+      currentStory = { title: '...', pages: placeholders };
+      storyPages = placeholders;
+      renderReader('...', placeholders);
+
+      currentPage = 0;
+      showScreen('reader');
+      showSwipeHint();
+    }
+
+    // Lanzamos la imagen de esta página inmediatamente
+    if (IMAGES_ENABLED) {
+      generateOneImage(page, index);
+    }
+  }
+
   try {
-    const story = await generateStoryText();
-    clearInterval(stepTimer);
+    const story = await generateStoryText(onPageReady);
 
-    for (let i = 0; i < 3; i++) markStepDone(steps[i]);
-    steps[3].classList.add('active');
-    bar.style.width = '60%';
+    // Si por alguna razón no se mostró el reader todavía
+    if (!readerShown) {
+      clearInterval(stepTimer);
+      for (let i = 0; i < 3; i++) markStepDone(steps[i]);
+      stopFunFacts();
+      currentPage = 0;
+      showScreen('reader');
+      showSwipeHint();
+    }
 
+    // Actualizamos el título y el texto real de cada página
     storyPages = story.pages;
     currentStory = story;
-    renderReader(story.title, story.pages);
+    document.getElementById('story-title').textContent = story.title;
+    story.pages.forEach((page, i) => {
+      const el = document.getElementById('page-text-' + i);
+      if (el) el.innerHTML = page.text;
+    });
 
     markStepDone(steps[3]);
     bar.style.width = '100%';
-    stopFunFacts();
-    currentPage = 0;
-    showScreen('reader');
-    showSwipeHint();
-
-    // Las 6 imágenes en paralelo en background
-    if (IMAGES_ENABLED) {
-      generateImages(story);
-    }
 
   } catch (err) {
     clearInterval(stepTimer);
@@ -972,7 +1009,33 @@ function markStepDone(el) {
   el.querySelector('.step-icon').textContent = '✅';
 }
 
-async function generateStoryText() {
+// Extrae el primer objeto de página completo del texto acumulado
+// Devuelve { page, remaining } o null si no hay página completa todavía
+function extractNextPage(text) {
+  // Buscamos un bloque { "page": N, ... } completo contando llaves
+  const start = text.indexOf('{"page"');
+  if (start === -1) return null;
+  let depth = 0;
+  for (let i = start; i < text.length; i++) {
+    if (text[i] === '{') depth++;
+    else if (text[i] === '}') {
+      depth--;
+      if (depth === 0) {
+        const chunk = text.slice(start, i + 1);
+        try {
+          const page = JSON.parse(chunk);
+          if (page.page && page.text && page.image_prompt) {
+            return { page, remaining: text.slice(i + 1) };
+          }
+        } catch { /* JSON incompleto, seguir */ }
+        return null;
+      }
+    }
+  }
+  return null;
+}
+
+async function generateStoryText(onPageReady) {
   const response = await fetch('/api/generate-story', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
@@ -1012,45 +1075,48 @@ Reglas del cuento:
 
   if (!response.ok) throw new Error('Error de red: ' + response.status);
 
-  // Leemos el stream SSE token a token
   const reader = response.body.getReader();
   const decoder = new TextDecoder();
-  let buffer = '';
-  let fullText = '';
-
-  // Actualizamos el subtitle con un contador de tokens visible
   const subtitleEl = document.getElementById('gen-subtitle');
+
+  let sseBuffer = '';   // buffer de líneas SSE incompletas
+  let jsonBuffer = '';  // texto JSON acumulado de Claude
+  let pagesEmitted = 0;
+  let fullText = '';
 
   while (true) {
     const { done, value } = await reader.read();
     if (done) break;
 
-    buffer += decoder.decode(value, { stream: true });
-    const lines = buffer.split('\n');
-    buffer = lines.pop(); // guarda línea incompleta
+    sseBuffer += decoder.decode(value, { stream: true });
+    const lines = sseBuffer.split('\n');
+    sseBuffer = lines.pop();
 
     for (const line of lines) {
       if (!line.startsWith('data: ')) continue;
       const data = line.slice(6).trim();
       if (data === '[DONE]') continue;
-
       try {
         const evt = JSON.parse(data);
         if (evt.type === 'content_block_delta' && evt.delta?.type === 'text_delta') {
-          fullText += evt.delta.text;
-          // Feedback visual: mostramos cuántas páginas se completaron
-          const pagesFound = (fullText.match(/"page":/g) || []).length;
-          if (pagesFound > 0) {
-            subtitleEl.textContent = `Escribiendo página ${pagesFound} de 6...`;
+          const token = evt.delta.text;
+          fullText += token;
+          jsonBuffer += token;
+
+          // Intentamos extraer páginas completas del buffer
+          let result;
+          while ((result = extractNextPage(jsonBuffer)) !== null) {
+            pagesEmitted++;
+            subtitleEl.textContent = `Escribiendo página ${pagesEmitted} de 6...`;
+            onPageReady(result.page, pagesEmitted - 1); // lanza imagen inmediatamente
+            jsonBuffer = result.remaining;
           }
         }
-      } catch {
-        // línea malformada, ignorar
-      }
+      } catch { /* ignorar */ }
     }
   }
 
-  // Parseamos el JSON completo
+  // Parseamos el JSON completo para título y estructura final
   const clean = fullText.replace(/```json|```/g, '').trim();
   const jsonMatch = clean.match(/\{[\s\S]*\}/);
   if (!jsonMatch) throw new Error('No se pudo parsear la historia');
@@ -1214,7 +1280,7 @@ function renderReader(title, pages) {
       <div class="page-text-panel">
         <div class="page-text-content">
           <div class="page-num-label">Página ${p.page} de ${pages.length}</div>
-          <div class="page-story-text">${p.text}</div>
+          <div class="page-story-text" id="page-text-${i}">${p.text}</div>
         </div>
         <div class="reader-nav">
           <button class="r-btn" id="prev-${i}" ${i === 0 ? 'disabled' : ''} onclick="goToPage(${i - 1})">◀</button>
