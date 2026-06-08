@@ -278,52 +278,61 @@ const IMAGES_ENABLED = true;
     display: flex; align-items: center; justify-content: center;
     font-size: 48px;
     margin-bottom: 24px;
-    animation: orb-pulse 2s ease-in-out infinite;
+    position: relative;
+    animation: orb-pulse 2.4s ease-in-out infinite;
+  }
+  .gen-orb::before, .gen-orb::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    border-radius: 50%;
+    border: 2px solid rgba(255,107,53,0.25);
+    animation: ring-out 2.4s ease-out infinite;
+  }
+  .gen-orb::after { animation-delay: 0.8s; }
+  @keyframes ring-out {
+    0%   { transform: scale(1);   opacity: 0.6; }
+    100% { transform: scale(2);   opacity: 0; }
   }
   @keyframes orb-pulse {
-    0%,100% { transform: scale(1); box-shadow: 0 0 0 0 rgba(255,107,53,0.2); }
-    50% { transform: scale(1.06); box-shadow: 0 0 0 16px rgba(255,107,53,0); }
+    0%,100% { transform: scale(1); }
+    50%      { transform: scale(1.06); }
   }
 
   .gen-title {
     font-family: 'Fredoka One', cursive;
     font-size: 22px; color: var(--ink);
-    margin-bottom: 8px;
-  }
-  .gen-subtitle {
-    font-size: 13px; color: var(--ink-muted);
-    line-height: 1.6; max-width: 280px;
-    margin-bottom: 28px;
+    margin-bottom: 10px;
   }
 
-  .gen-steps { width: 100%; text-align: left; margin-bottom: 16px; }
-  .gen-step-item {
-    display: flex; align-items: center; gap: 10px;
-    padding: 8px 12px; border-radius: 10px;
-    font-size: 13px; font-weight: 600;
-    color: var(--ink-muted);
-    transition: all 0.3s;
-    margin-bottom: 4px;
-  }
-  .gen-step-item.active {
-    background: var(--orange-light);
+  /* Mensaje rotativo — pocas palabras, fade in/out */
+  .gen-message {
+    font-size: 14px; font-weight: 700;
     color: var(--orange-dark);
+    min-height: 22px;
+    margin-bottom: 32px;
+    transition: opacity 0.4s ease;
   }
-  .gen-step-item.done { color: var(--outcome-color); }
-  .step-icon { font-size: 18px; width: 24px; text-align: center; }
 
+  /* Barra única no-lineal */
   .gen-bar-track {
-    width: 100%; height: 6px;
+    width: 100%; height: 8px;
     background: var(--border);
-    border-radius: 3px; overflow: hidden;
-    margin-top: 8px;
+    border-radius: 4px; overflow: hidden;
   }
   .gen-bar-fill {
     height: 100%;
-    background: linear-gradient(90deg, var(--orange), #FF9A5C);
-    border-radius: 3px;
+    background: linear-gradient(90deg, var(--orange), #FF9A5C, #FFD19A);
+    background-size: 200% 100%;
+    border-radius: 4px;
     width: 0%;
-    transition: width 0.6s ease;
+    /* Transición larga para simular frenado natural */
+    transition: width 1.2s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+    animation: bar-shine 2s linear infinite;
+  }
+  @keyframes bar-shine {
+    0%   { background-position: 100% 0; }
+    100% { background-position: -100% 0; }
   }
 
   .gen-error {
@@ -806,21 +815,15 @@ const IMAGES_ENABLED = true;
   </div>
 
   <!-- ── SCREEN 2: GENERATING ── -->
+  <!-- ── SCREEN 2: GENERATING ── -->
   <div id="screen-gen" class="screen">
     <div class="gen-orb" id="gen-orb">✨</div>
-    <div class="gen-title" id="gen-title">Escribiendo tu cuento...</div>
-    <div class="gen-subtitle" id="gen-subtitle">Preparando una aventura increíble</div>
-    <div class="gen-steps">
-      <div class="gen-step-item" id="step-0"><span class="step-icon">🌍</span>Construyendo el mundo</div>
-      <div class="gen-step-item" id="step-1"><span class="step-icon">✏️</span>Inventando personajes</div>
-      <div class="gen-step-item" id="step-2"><span class="step-icon">📖</span>Escribiendo la aventura</div>
-      <div class="gen-step-item" id="step-3"><span class="step-icon">🎨</span>Dibujando las ilustraciones</div>
-    </div>
+    <div class="gen-title">Creando tu aventura...</div>
+    <div class="gen-message" id="gen-message">Imaginando el mundo</div>
     <div class="gen-bar-track">
       <div class="gen-bar-fill" id="gen-bar"></div>
     </div>
-    <div id="gen-fun-fact" style="font-size:11px;color:var(--ink-muted);font-style:italic;margin-top:14px;min-height:32px;line-height:1.5;max-width:260px;text-align:center;transition:opacity 0.3s ease;"></div>
-    <div class="img-progress-row" id="img-progress-row" style="display:none"></div>
+    <div id="gen-fun-fact" style="font-size:11px;color:var(--ink-muted);font-style:italic;margin-top:18px;min-height:32px;line-height:1.5;max-width:260px;text-align:center;transition:opacity 0.4s ease;"></div>
     <div class="gen-error" id="gen-error"></div>
   </div>
 
@@ -910,90 +913,78 @@ function updateRecipe() {
 
 document.getElementById('btn-create').addEventListener('click', startGeneration);
 
+// Mensajes cortos rotativos durante la generación
+const GEN_MESSAGES = [
+  'Imaginando el mundo',
+  'Inventando personajes',
+  'Escribiendo la historia',
+  'Eligiendo los colores',
+  'Casi listo...',
+];
+
+// Barra no-lineal: avanza rápido al principio, se frena, salta al final
+const BAR_KEYFRAMES = [
+  { pct: 15, delay: 400 },
+  { pct: 35, delay: 1800 },
+  { pct: 55, delay: 3500 },
+  { pct: 70, delay: 6000 },
+  { pct: 80, delay: 10000 },
+  { pct: 88, delay: 16000 },
+];
+
 async function startGeneration() {
   showScreen('gen');
-  const steps = document.querySelectorAll('.gen-step-item');
   const bar = document.getElementById('gen-bar');
-  let stepIdx = 0;
-  let readerShown = false;
+  const msgEl = document.getElementById('gen-message');
 
+  // Arranca fun facts
   startFunFacts();
 
-  const stepTimer = setInterval(() => {
-    if (stepIdx < 3) {
-      if (stepIdx > 0) markStepDone(steps[stepIdx - 1]);
-      steps[stepIdx].classList.add('active');
-      bar.style.width = ((stepIdx + 1) * 20) + '%';
-      stepIdx++;
-    }
-  }, 1100);
+  // Barra no-lineal: timers escalonados
+  const barTimers = BAR_KEYFRAMES.map(({ pct, delay }) =>
+    setTimeout(() => { bar.style.width = pct + '%'; }, delay)
+  );
 
-  document.getElementById('gen-subtitle').textContent =
-    `${selections.hero.emoji} ${selections.hero.label} y ${selections.friend.emoji} ${selections.friend.label} están a punto de vivir algo increíble...`;
+  // Mensajes rotativos cada 4s
+  let msgIdx = 0;
+  function showMsg() {
+    msgEl.style.opacity = '0';
+    setTimeout(() => {
+      msgEl.textContent = GEN_MESSAGES[msgIdx % GEN_MESSAGES.length];
+      msgEl.style.opacity = '1';
+      msgIdx++;
+    }, 400);
+  }
+  showMsg();
+  const msgTimer = setInterval(showMsg, 4000);
 
-  // Páginas acumuladas mientras llegan del stream
-  const pagesAccumulated = [];
-
-  // Callback: se llama en cuanto cada página esté completa
-  function onPageReady(page, index) {
-    pagesAccumulated.push(page);
-
-    // En cuanto llega la primera página, mostramos el reader
-    if (!readerShown) {
-      readerShown = true;
-      clearInterval(stepTimer);
-      for (let i = 0; i < 3; i++) markStepDone(steps[i]);
-      steps[3].classList.add('active');
-      bar.style.width = '60%';
-      stopFunFacts();
-
-      // Renderizamos con placeholders para las páginas que faltan
-      const placeholders = Array.from({ length: 6 }, (_, i) =>
-        pagesAccumulated[i] || { page: i + 1, emoji: '✨', text: '', image_prompt: '' }
-      );
-      currentStory = { title: '...', pages: placeholders };
-      storyPages = placeholders;
-      renderReader('...', placeholders);
-
-      currentPage = 0;
-      showScreen('reader');
-      showSwipeHint();
-    }
-
-    // Lanzamos la imagen de esta página inmediatamente
-    if (IMAGES_ENABLED) {
-      generateOneImage(page, index);
-    }
+  function cleanup() {
+    barTimers.forEach(clearTimeout);
+    clearInterval(msgTimer);
+    stopFunFacts();
   }
 
   try {
-    const story = await generateStoryText(onPageReady);
+    const story = await generateStoryText();
+    cleanup();
 
-    // Si por alguna razón no se mostró el reader todavía
-    if (!readerShown) {
-      clearInterval(stepTimer);
-      for (let i = 0; i < 3; i++) markStepDone(steps[i]);
-      stopFunFacts();
-      currentPage = 0;
-      showScreen('reader');
-      showSwipeHint();
-    }
-
-    // Actualizamos el título y el texto real de cada página
     storyPages = story.pages;
     currentStory = story;
-    document.getElementById('story-title').textContent = story.title;
-    story.pages.forEach((page, i) => {
-      const el = document.getElementById('page-text-' + i);
-      if (el) el.innerHTML = page.text;
-    });
+    renderReader(story.title, story.pages);
 
-    markStepDone(steps[3]);
+    // Barra al 100% con transición rápida
+    bar.style.transition = 'width 0.4s ease';
     bar.style.width = '100%';
 
+    await new Promise(r => setTimeout(r, 350));
+    currentPage = 0;
+    showScreen('reader');
+    showSwipeHint();
+
+    if (IMAGES_ENABLED) generateImages(story);
+
   } catch (err) {
-    clearInterval(stepTimer);
-    stopFunFacts();
+    cleanup();
     bar.style.width = '0%';
     const errEl = document.getElementById('gen-error');
     errEl.style.display = 'block';
@@ -1003,39 +994,7 @@ async function startGeneration() {
   }
 }
 
-function markStepDone(el) {
-  el.classList.remove('active');
-  el.classList.add('done');
-  el.querySelector('.step-icon').textContent = '✅';
-}
-
-// Extrae el primer objeto de página completo del texto acumulado
-// Devuelve { page, remaining } o null si no hay página completa todavía
-function extractNextPage(text) {
-  // Buscamos un bloque { "page": N, ... } completo contando llaves
-  const start = text.indexOf('{"page"');
-  if (start === -1) return null;
-  let depth = 0;
-  for (let i = start; i < text.length; i++) {
-    if (text[i] === '{') depth++;
-    else if (text[i] === '}') {
-      depth--;
-      if (depth === 0) {
-        const chunk = text.slice(start, i + 1);
-        try {
-          const page = JSON.parse(chunk);
-          if (page.page && page.text && page.image_prompt) {
-            return { page, remaining: text.slice(i + 1) };
-          }
-        } catch { /* JSON incompleto, seguir */ }
-        return null;
-      }
-    }
-  }
-  return null;
-}
-
-async function generateStoryText(onPageReady) {
+async function generateStoryText() {
   const response = await fetch('/api/generate-story', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
@@ -1077,21 +1036,15 @@ Reglas del cuento:
 
   const reader = response.body.getReader();
   const decoder = new TextDecoder();
-  const subtitleEl = document.getElementById('gen-subtitle');
-
-  let sseBuffer = '';   // buffer de líneas SSE incompletas
-  let jsonBuffer = '';  // texto JSON acumulado de Claude
-  let pagesEmitted = 0;
+  let sseBuffer = '';
   let fullText = '';
 
   while (true) {
     const { done, value } = await reader.read();
     if (done) break;
-
     sseBuffer += decoder.decode(value, { stream: true });
     const lines = sseBuffer.split('\n');
     sseBuffer = lines.pop();
-
     for (const line of lines) {
       if (!line.startsWith('data: ')) continue;
       const data = line.slice(6).trim();
@@ -1099,24 +1052,12 @@ Reglas del cuento:
       try {
         const evt = JSON.parse(data);
         if (evt.type === 'content_block_delta' && evt.delta?.type === 'text_delta') {
-          const token = evt.delta.text;
-          fullText += token;
-          jsonBuffer += token;
-
-          // Intentamos extraer páginas completas del buffer
-          let result;
-          while ((result = extractNextPage(jsonBuffer)) !== null) {
-            pagesEmitted++;
-            subtitleEl.textContent = `Escribiendo página ${pagesEmitted} de 6...`;
-            onPageReady(result.page, pagesEmitted - 1); // lanza imagen inmediatamente
-            jsonBuffer = result.remaining;
-          }
+          fullText += evt.delta.text;
         }
       } catch { /* ignorar */ }
     }
   }
 
-  // Parseamos el JSON completo para título y estructura final
   const clean = fullText.replace(/```json|```/g, '').trim();
   const jsonMatch = clean.match(/\{[\s\S]*\}/);
   if (!jsonMatch) throw new Error('No se pudo parsear la historia');
@@ -1362,14 +1303,10 @@ function resetApp() {
   document.getElementById('progress').style.width = '0%';
   document.getElementById('btn-create').disabled = true;
   document.getElementById('gen-error').style.display = 'none';
-  document.getElementById('img-progress-row').style.display = 'none';
-  document.getElementById('img-progress-row').innerHTML = '';
-  document.querySelectorAll('.gen-step-item').forEach(s => {
-    s.classList.remove('active','done');
-    const ico = s.querySelector('.step-icon');
-    if (ico.dataset.orig) ico.textContent = ico.dataset.orig;
-  });
-  document.getElementById('gen-bar').style.width = '0%';
+  const bar = document.getElementById('gen-bar');
+  bar.style.transition = 'width 1.2s cubic-bezier(0.25, 0.46, 0.45, 0.94)';
+  bar.style.width = '0%';
+  document.getElementById('gen-message').textContent = 'Imaginando el mundo';
   updateRecipe();
   storyPages = [];
   currentPage = 0;
@@ -1380,8 +1317,6 @@ function resetApp() {
 
 document.getElementById('btn-play-again').addEventListener('click', resetApp);
 document.getElementById('btn-new-story').addEventListener('click', resetApp);
-
-document.querySelectorAll('.gen-step-item .step-icon').forEach(ico => ico.dataset.orig = ico.textContent);
 </script>
 </body>
 </html>
