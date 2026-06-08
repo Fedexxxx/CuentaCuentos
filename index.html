@@ -443,11 +443,17 @@ const IMAGES_ENABLED = true;
     transition: opacity 0.4s ease;
   }
   .illus-shimmer.hidden { opacity: 0; pointer-events: none; }
-  .shimmer-emoji { font-size: 56px; filter: drop-shadow(0 4px 12px rgba(0,0,0,0.3)); }
   .shimmer-text {
-    font-size: 11px; font-weight: 700;
-    color: rgba(255,255,255,0.5);
+    font-size: 13px; font-weight: 700;
+    color: rgba(255,255,255,0.65);
     text-transform: uppercase; letter-spacing: 1px;
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 100%;
+    text-align: center;
+    padding: 0 16px;
   }
 
   /* Overlay de texto sobreimpreso — posicionado en la zona inferior */
@@ -924,12 +930,17 @@ const GEN_MESSAGES = [
 
 // Barra no-lineal: avanza rápido al principio, se frena, salta al final
 const BAR_KEYFRAMES = [
-  { pct: 15, delay: 400 },
-  { pct: 35, delay: 1800 },
-  { pct: 55, delay: 3500 },
-  { pct: 70, delay: 6000 },
-  { pct: 80, delay: 10000 },
-  { pct: 88, delay: 16000 },
+  { pct: 12, delay: 300 },
+  { pct: 24, delay: 1200 },
+  { pct: 36, delay: 2800 },
+  { pct: 46, delay: 4500 },
+  { pct: 55, delay: 6500 },
+  { pct: 63, delay: 8500 },
+  { pct: 70, delay: 11000 },
+  { pct: 76, delay: 14000 },
+  { pct: 81, delay: 17000 },
+  { pct: 85, delay: 20000 },
+  { pct: 88, delay: 24000 },
 ];
 
 async function startGeneration() {
@@ -1180,7 +1191,7 @@ const url = `data:image/png;base64,${b64}`;
 
   } catch (err) {
     if (shimmerEl) {
-      shimmerEl.innerHTML = `<div class="shimmer-emoji">${page.emoji}</div><div class="shimmer-text">Ilustración no disponible</div>`;
+      shimmerEl.innerHTML = `<div class="shimmer-text">Ilustración no disponible</div>`;
       shimmerEl.style.animation = 'none';
       shimmerEl.style.background = 'rgba(255,255,255,0.05)';
     }
@@ -1213,7 +1224,6 @@ function renderReader(title, pages) {
     pageEl.innerHTML = `
       <div class="page-illustration bg-${i % 6}">
         <div class="illus-shimmer" id="page-shimmer-${i}">
-          <div class="shimmer-emoji">${p.emoji}</div>
           <div class="shimmer-text">${getShimmerText(i)}</div>
         </div>
         <img class="illus-img" id="page-img-${i}" alt="Ilustración de la página ${i + 1}" />
