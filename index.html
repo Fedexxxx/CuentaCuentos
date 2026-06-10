@@ -1149,8 +1149,10 @@ function getShimmerText(pageIndex) {
 
 async function generateImages(story) {
   const pages = story.pages;
-  const imagePromises = pages.map((page, i) => generateOneImage(page, i));
-  await Promise.allSettled(imagePromises);
+  // Página 1 primero — es la que el usuario ve de inmediato
+  await generateOneImage(pages[0], 0);
+  // El resto en paralelo
+  Promise.allSettled(pages.slice(1).map((page, i) => generateOneImage(page, i + 1)));
 }
 
 async function generateOneImage(page, index) {
