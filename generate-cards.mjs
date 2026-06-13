@@ -105,10 +105,15 @@ async function main() {
     const batch = CARDS.slice(i, i + BATCH);
     await Promise.all(
       batch.map(async (card) => {
+        const filePath = path.join(OUTPUT_DIR, `${card.file}.png`);
+        if (fs.existsSync(filePath)) {
+          console.log(`  ⏭️  ${card.file} ya existe, saltando`);
+          return;
+        }
         process.stdout.write(`  ⏳ ${card.file}...`);
         try {
-          const filePath = await generateImage(card);
-          console.log(` ✅ guardado en ${filePath}`);
+          await generateImage(card);
+          console.log(` ✅ guardado`);
         } catch (err) {
           console.log(` ❌ error: ${err.message}`);
         }
