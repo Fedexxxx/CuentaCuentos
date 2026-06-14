@@ -850,7 +850,7 @@ let storyPages = [];
 let currentPage = 0;
 let currentStory = null;
 
-const IMAGE_STYLE = "flat 2D children's book illustration, simple bold outlines, solid warm colors, minimal detail, cute friendly characters with small closed mouths and simple round eyes, no text, safe for children aged 4-10, characters in upper two thirds, lower third open for text";
+const IMAGE_STYLE = "soft watercolor children's book illustration, loose painterly washes, warm pastel colors, magical and dreamy atmosphere, no characters, no faces, no people, no text, safe for children";
 
 function showScreen(id) {
   document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
@@ -997,7 +997,7 @@ El JSON debe tener exactamente esta estructura:
     {
       "page": 1,
       "emoji": "un solo emoji que represente la escena",
-      "image_prompt": "describe the scene in English in 1-2 sentences for a children's book image generator. Describe setting, characters, mood. All characters must look cute, friendly and rounded — even villains should look cartoonish and non-scary. Always include: a [HERO] character who is [DESCRIPTION]. Place all characters in the upper half of the scene. The lower portion must be open calm space (ground, grass, floor) with no characters. Never mention text, words, darkness, horror or anything frightening.",
+      "image_prompt": "describe the scene atmosphere in English in 1-2 sentences for a children's book illustrator. Focus on the setting, magical objects, nature, light and mood — NOT on characters or faces. Evoke what is happening through the environment: a glowing cave, a stormy sky clearing up, a cozy forest path with scattered clues. Warm and inviting mood always. Never describe faces, bodies or characters directly. Never mention text, darkness or anything frightening.",
       "text": "2 a 4 oraciones simples y vívidas para niños. Usá <strong>Nombre</strong> para el nombre del héroe la primera vez que aparece."
     }
   ]
