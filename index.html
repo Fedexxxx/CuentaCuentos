@@ -775,39 +775,7 @@ const IMAGES_ENABLED = true;
         </div>
       </div>
 
-      <div class="slot" id="slot-outcome">
-        <div class="slot-label">
-          <div class="slot-dot" style="background:var(--outcome-color)">5</div>
-          El final es sobre...
-        </div>
-        <div class="cards-scroll">
-          <div class="card" data-slot="outcome" data-val="amistad" data-label="La amistad" data-emoji="🤝" style="--slot-color:var(--outcome-color);--slot-bg:#EDFFF3;--slot-shadow:rgba(45,198,83,0.25)">
-            <div class="check">✓</div>
-            <div class="card-img-wrap"><div class="card-emoji-fallback">🤝</div><img src="/public/cards/outcome-amistad.png" alt="La amistad" loading="eager" onerror="this.style.display='none'"></div>
-            <div class="name">La amistad</div>
-          </div>
-          <div class="card" data-slot="outcome" data-val="valentia" data-label="La valentía" data-emoji="💪" style="--slot-color:var(--outcome-color);--slot-bg:#EDFFF3;--slot-shadow:rgba(45,198,83,0.25)">
-            <div class="check">✓</div>
-            <div class="card-img-wrap"><div class="card-emoji-fallback">💪</div><img src="/public/cards/outcome-valentia.png" alt="La valentía" loading="eager" onerror="this.style.display='none'"></div>
-            <div class="name">La valentía</div>
-          </div>
-          <div class="card" data-slot="outcome" data-val="astucia" data-label="La astucia" data-emoji="💡" style="--slot-color:var(--outcome-color);--slot-bg:#EDFFF3;--slot-shadow:rgba(45,198,83,0.25)">
-            <div class="check">✓</div>
-            <div class="card-img-wrap"><div class="card-emoji-fallback">💡</div><img src="/public/cards/outcome-astucia.png" alt="La astucia" loading="eager" onerror="this.style.display='none'"></div>
-            <div class="name">La astucia</div>
-          </div>
-          <div class="card" data-slot="outcome" data-val="sacrificio" data-label="El sacrificio" data-emoji="🌟" style="--slot-color:var(--outcome-color);--slot-bg:#EDFFF3;--slot-shadow:rgba(45,198,83,0.25)">
-            <div class="check">✓</div>
-            <div class="card-img-wrap"><div class="card-emoji-fallback">🌟</div><img src="/public/cards/outcome-sacrificio.png" alt="El sacrificio" loading="eager" onerror="this.style.display='none'"></div>
-            <div class="name">El sacrificio</div>
-          </div>
-          <div class="card" data-slot="outcome" data-val="perdon" data-label="El perdón" data-emoji="🕊️" style="--slot-color:var(--outcome-color);--slot-bg:#EDFFF3;--slot-shadow:rgba(45,198,83,0.25)">
-            <div class="check">✓</div>
-            <div class="card-img-wrap"><div class="card-emoji-fallback">🕊️</div><img src="/public/cards/outcome-perdon.png" alt="El perdón" loading="eager" onerror="this.style.display='none'"></div>
-            <div class="name">El perdón</div>
-          </div>
-        </div>
-      </div>
+
 
       <div class="recipe-area">
         <div class="recipe-label">Tu historia tiene:</div>
@@ -869,14 +837,20 @@ const IMAGES_ENABLED = true;
 </div>
 
 <script>
-const selections = { hero: null, friend: null, villain: null, obstacle: null, outcome: null };
-const slotColors = { hero: '#FF6B35', friend: '#3B9EFF', villain: '#9B5DE5', obstacle: '#F4B942', outcome: '#2DC653' };
-const slotBg = { hero: '#FFF0E8', friend: '#EBF5FF', villain: '#F5EDFF', obstacle: '#FFF8E5', outcome: '#EDFFF3' };
+const selections = { hero: null, friend: null, villain: null, obstacle: null };
+const slotColors = { hero: '#FF6B35', friend: '#3B9EFF', villain: '#9B5DE5', obstacle: '#F4B942' };
+const slotBg = { hero: '#FFF0E8', friend: '#EBF5FF', villain: '#F5EDFF', obstacle: '#FFF8E5' };
+const OUTCOMES = [
+  { val: 'amistad',  label: 'La amistad',  emoji: '🤝' },
+  { val: 'valentia', label: 'La valentía', emoji: '💪' },
+  { val: 'astucia',  label: 'La astucia',  emoji: '💡' },
+];
+function randomOutcome() { return OUTCOMES[Math.floor(Math.random() * OUTCOMES.length)]; }
 let storyPages = [];
 let currentPage = 0;
 let currentStory = null;
 
-const IMAGE_STYLE = "soft watercolor children's book illustration, gentle color washes, warm and friendly, no text, safe for children, characters in upper two thirds, lower third open for text";
+const IMAGE_STYLE = "flat 2D children's book illustration, simple bold outlines, solid warm colors, minimal detail, cute friendly characters with small closed mouths and simple round eyes, no text, safe for children aged 4-10, characters in upper two thirds, lower third open for text";
 
 function showScreen(id) {
   document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
@@ -1200,12 +1174,13 @@ const url = `data:image/png;base64,${b64}`;
 }
 
 function buildPrompt() {
+  const outcome = randomOutcome();
   return `Escribí un cuento infantil con estos elementos:
 - Héroe: ${selections.hero.label} (${selections.hero.emoji})
 - Amigo: ${selections.friend.label} (${selections.friend.emoji})
 - Villano: ${selections.villain.label} (${selections.villain.emoji})
 - Obstáculo: ${selections.obstacle.label} (${selections.obstacle.emoji})
-- Tema del final: ${selections.outcome.label} (${selections.outcome.emoji})`;
+- Tema del final: ${outcome.label} (${outcome.emoji})`;
 }
 
 function renderReader(title, pages) {
