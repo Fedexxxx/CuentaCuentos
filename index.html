@@ -429,6 +429,22 @@ const IMAGES_ENABLED = true;
   }
   .illus-img.loaded { opacity: 1; }
 
+  /* Stickers de personajes superpuestos sobre la ilustración de ambiente */
+  .page-sticker {
+    position: absolute;
+    z-index: 2;
+    height: 38%;
+    width: auto;
+    object-fit: contain;
+    filter: drop-shadow(0 6px 14px rgba(0,0,0,0.25));
+    pointer-events: none;
+  }
+  /* Un solo sticker: centrado en el tercio inferior-medio */
+  .sticker-pos-1-0 { left: 50%; bottom: 38%; transform: translateX(-50%); }
+  /* Dos stickers: uno a cada lado, encarados */
+  .sticker-pos-2-0 { left: 18%; bottom: 36%; }
+  .sticker-pos-2-1 { right: 18%; bottom: 36%; transform: scaleX(-1); }
+
   @keyframes shimmer {
     0% { background-position: -880px 0; }
     100% { background-position: 880px 0; }
@@ -846,6 +862,35 @@ const OUTCOMES = [
   { val: 'astucia',  label: 'La astucia',  emoji: '💡' },
 ];
 function randomOutcome() { return OUTCOMES[Math.floor(Math.random() * OUTCOMES.length)]; }
+
+// Mapeo val -> archivo de sticker (mockup: solo 12 personajes tienen sticker por ahora)
+const STICKER_MAP = {
+  nina: 'sticker-hero-nina',
+  robot: 'sticker-hero-robot',
+  zorro: 'sticker-hero-zorro',
+  bruja: 'sticker-hero-bruja',
+  dragon: 'sticker-friend-dragon',
+  fantasma: 'sticker-friend-fantasma',
+  pulpo: 'sticker-friend-pulpo',
+  robot2: 'sticker-friend-robot',
+  gigante: 'sticker-villain-gigante',
+  maquina: 'sticker-villain-maquina',
+  sombra: 'sticker-villain-sombra',
+};
+
+function getStickersForPage(pageIndex) {
+  const stickers = [];
+  if (pageIndex <= 1 && selections.hero?.val && STICKER_MAP[selections.hero.val]) {
+    stickers.push(STICKER_MAP[selections.hero.val]);
+  }
+  if (pageIndex === 1 && selections.friend?.val && STICKER_MAP[selections.friend.val]) {
+    stickers.push(STICKER_MAP[selections.friend.val]);
+  }
+  if (pageIndex >= 2 && selections.villain?.val && STICKER_MAP[selections.villain.val]) {
+    stickers.push(STICKER_MAP[selections.villain.val]);
+  }
+  return stickers;
+}
 let storyPages = [];
 let currentPage = 0;
 let currentStory = null;
@@ -1195,12 +1240,17 @@ function renderReader(title, pages) {
     pageEl.className = 'comic-page' + (i === 0 ? ' active' : '');
     pageEl.id = 'cpage-' + i;
 
+    const pageStickers = getStickersForPage(i);
+    const stickersHtml = pageStickers.map((file, si) => `
+        <img class="page-sticker sticker-pos-${pageStickers.length}-${si}" src="/public/stickers/${file}.png" alt="" onerror="this.style.display='none'">`).join('');
+
     pageEl.innerHTML = `
       <div class="page-illustration bg-${i % 6}">
         <div class="illus-shimmer" id="page-shimmer-${i}">
           <div class="shimmer-text">${getShimmerText(i)}</div>
         </div>
         <img class="illus-img" id="page-img-${i}" alt="Ilustración de la página ${i + 1}" />
+        ${stickersHtml}
       </div>
       <div class="page-text-panel">
         <div class="page-text-content">
