@@ -436,7 +436,7 @@ const IMAGES_ENABLED = true;
     height: 38%;
     width: auto;
     object-fit: contain;
-    filter: drop-shadow(0 6px 14px rgba(0,0,0,0.25));
+    mix-blend-mode: multiply;
     pointer-events: none;
   }
   /* Un solo sticker: centrado en el tercio inferior-medio */
@@ -919,7 +919,7 @@ let storyPages = [];
 let currentPage = 0;
 let currentStory = null;
 
-const IMAGE_STYLE = "soft watercolor children's book illustration, loose painterly washes, warm pastel colors, characters shown as simple charming silhouettes with NO facial features, NO eyes, NO mouth, NO nose, recognizable only by their shape and outline, magical and dreamy atmosphere, no text, safe for children";
+const IMAGE_STYLE = "soft watercolor children's book illustration, loose painterly washes, warm pastel colors, magical and dreamy atmosphere, beautiful detailed scenery and setting, NO characters, NO people, NO creatures, NO silhouettes, empty landscape only, no text, safe for children";
 
 function showScreen(id) {
   document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
@@ -1066,7 +1066,7 @@ El JSON debe tener exactamente esta estructura:
     {
       "page": 1,
       "emoji": "un solo emoji que represente la escena",
-      "image_prompt": "describe the scene in English in 1-2 sentences for a watercolor children's book illustrator. Include the characters but describe them ONLY as silhouettes recognizable by their shape: a dragon by its wings and tail, a fox by its ears, a witch by her hat, a robot by its boxy form. No faces, no expressions, no eyes or mouths. Describe the setting, light and mood around the silhouettes. Warm and magical atmosphere always. No text, nothing frightening.",
+      "image_prompt": "describe ONLY the scene atmosphere in English in 1-2 sentences for a children's book illustrator. Focus on the setting, magical objects, nature, light and mood. Do NOT mention any character, creature, person, animal or silhouette of any kind — describe only the empty environment where the action happens: a glowing cave, a stormy sky clearing up, a forest path with footprints in the dirt, a castle window with light spilling out. Warm and inviting mood always. No text, nothing frightening.",
       "text": "2 a 4 oraciones simples y vívidas para niños. Usá <strong>Nombre</strong> para el nombre del héroe la primera vez que aparece."
     }
   ]
