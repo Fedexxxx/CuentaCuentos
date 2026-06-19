@@ -863,20 +863,44 @@ const OUTCOMES = [
 ];
 function randomOutcome() { return OUTCOMES[Math.floor(Math.random() * OUTCOMES.length)]; }
 
-// Mapeo val -> archivo de sticker (mockup: solo 12 personajes tienen sticker por ahora)
+// Mapeo val -> id base del personaje (cada uno tiene variantes -v1 a -v4 curadas)
+const STICKER_DIR = '/public/cards/stickers';
+const STICKER_VARIANTS = 4;
 const STICKER_MAP = {
-  nina: 'sticker-hero-nina',
-  robot: 'sticker-hero-robot',
-  zorro: 'sticker-hero-zorro',
-  bruja: 'sticker-hero-bruja',
-  dragon: 'sticker-friend-dragon',
-  fantasma: 'sticker-friend-fantasma',
-  pulpo: 'sticker-friend-pulpo',
-  robot2: 'sticker-friend-robot',
-  gigante: 'sticker-villain-gigante',
-  maquina: 'sticker-villain-maquina',
-  sombra: 'sticker-villain-sombra',
+  nina: 'hero-nina',
+  robot: 'hero-robot',
+  zorro: 'hero-zorro',
+  bruja: 'hero-bruja',
+  dragon: 'friend-dragon',
+  fantasma: 'friend-fantasma',
+  pulpo: 'friend-pulpo',
+  robot2: 'friend-robot',
+  gigante: 'villain-gigante',
+  maquina: 'villain-maquina',
+  sombra: 'villain-sombra',
 };
+
+// Elige una variante al azar para un personaje (v1-v4). Se resuelve una sola vez por
+// personaje y se mantiene fija durante todo el cuento para consistencia visual.
+const chosenVariant = {};
+function getStickerSrc(charId) {
+  if (!chosenVariant[charId]) {
+    chosenVariant[charId] = Math.floor(Math.random() * STICKER_VARIANTS) + 1;
+  }
+  return `${STICKER_DIR}/${charId}-v${chosenVariant[charId]}.png`;
+}
+
+// Si la variante elegida no existe (curación la eliminó), prueba con las demás antes de ocultar
+function handleStickerError(imgEl, charId, attempted) {
+  attempted = attempted || [];
+  attempted.push(chosenVariant[charId]);
+  const remaining = [1, 2, 3, 4].filter(v => !attempted.includes(v));
+  if (remaining.length === 0) { imgEl.style.display = 'none'; return; }
+  const nextVariant = remaining[Math.floor(Math.random() * remaining.length)];
+  chosenVariant[charId] = nextVariant;
+  imgEl.onerror = function() { handleStickerError(imgEl, charId, attempted); };
+  imgEl.src = `${STICKER_DIR}/${charId}-v${nextVariant}.png`;
+}
 
 function getStickersForPage(pageIndex) {
   const stickers = [];
@@ -1241,8 +1265,8 @@ function renderReader(title, pages) {
     pageEl.id = 'cpage-' + i;
 
     const pageStickers = getStickersForPage(i);
-    const stickersHtml = pageStickers.map((file, si) => `
-        <img class="page-sticker sticker-pos-${pageStickers.length}-${si}" src="/public/stickers/${file}.png" alt="" onerror="this.style.display='none'">`).join('');
+    const stickersHtml = pageStickers.map((charId, si) => `
+        <img class="page-sticker sticker-pos-${pageStickers.length}-${si}" src="${getStickerSrc(charId)}" alt="" onerror="handleStickerError(this, '${charId}')">`).join('');
 
     pageEl.innerHTML = `
       <div class="page-illustration bg-${i % 6}">
