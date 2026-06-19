@@ -438,7 +438,11 @@ const IMAGES_ENABLED = true;
     object-fit: contain;
     mix-blend-mode: multiply;
     pointer-events: none;
+    opacity: 0;
+    transition: opacity 0.5s ease;
   }
+  .page-sticker.sticker-hidden { opacity: 0; }
+  .page-sticker.sticker-visible { opacity: 1; }
   /* Un solo sticker: centrado en el tercio inferior-medio */
   .sticker-pos-1-0 { left: 50%; bottom: 38%; transform: translateX(-50%); }
   /* Dos stickers: uno a cada lado, encarados */
@@ -904,14 +908,29 @@ function handleStickerError(imgEl, charId, attempted) {
 
 function getStickersForPage(pageIndex) {
   const stickers = [];
-  if (pageIndex <= 1 && selections.hero?.val && STICKER_MAP[selections.hero.val]) {
+  const lastPage = 5; // cuento siempre de 6 páginas (índices 0-5)
+  const isClimax = pageIndex >= 2 && pageIndex <= 4;
+  const isFinal = pageIndex === lastPage;
+
+  if (pageIndex === 0 && selections.hero?.val && STICKER_MAP[selections.hero.val]) {
+    stickers.push(STICKER_MAP[selections.hero.val]);
+  }
+  if (pageIndex === 1 && selections.hero?.val && STICKER_MAP[selections.hero.val]) {
     stickers.push(STICKER_MAP[selections.hero.val]);
   }
   if (pageIndex === 1 && selections.friend?.val && STICKER_MAP[selections.friend.val]) {
     stickers.push(STICKER_MAP[selections.friend.val]);
   }
-  if (pageIndex >= 2 && selections.villain?.val && STICKER_MAP[selections.villain.val]) {
+  if (isClimax && selections.villain?.val && STICKER_MAP[selections.villain.val]) {
     stickers.push(STICKER_MAP[selections.villain.val]);
+  }
+  if (isFinal) {
+    if (selections.hero?.val && STICKER_MAP[selections.hero.val]) {
+      stickers.push(STICKER_MAP[selections.hero.val]);
+    }
+    if (selections.friend?.val && STICKER_MAP[selections.friend.val]) {
+      stickers.push(STICKER_MAP[selections.friend.val]);
+    }
   }
   return stickers;
 }
@@ -1227,6 +1246,10 @@ const url = `data:image/png;base64,${b64}`;
       imgEl.onload = () => {
         imgEl.classList.add('loaded');
         if (shimmerEl) shimmerEl.classList.add('hidden');
+        document.querySelectorAll(`[id^="page-sticker-${index}-"]`).forEach(el => {
+          el.classList.remove('sticker-hidden');
+          el.classList.add('sticker-visible');
+        });
       };
     }
     if (dot) { dot.classList.remove('loading'); dot.classList.add('done'); }
@@ -1266,12 +1289,12 @@ function renderReader(title, pages) {
 
     const pageStickers = getStickersForPage(i);
     const stickersHtml = pageStickers.map((charId, si) => `
-        <img class="page-sticker sticker-pos-${pageStickers.length}-${si}" src="${getStickerSrc(charId)}" alt="" onerror="handleStickerError(this, '${charId}')">`).join('');
+        <img class="page-sticker sticker-hidden sticker-pos-${pageStickers.length}-${si}" id="page-sticker-${i}-${si}" src="${getStickerSrc(charId)}" alt="" onerror="handleStickerError(this, '${charId}')">`).join('');
 
     pageEl.innerHTML = `
       <div class="page-illustration bg-${i % 6}">
         <div class="illus-shimmer" id="page-shimmer-${i}">
-          <div class="shimmer-text">${getShimmerText(i)}</div>
+          <div class="shimmer-text">Estamos creando el cuento...</div>
         </div>
         <img class="illus-img" id="page-img-${i}" alt="Ilustración de la página ${i + 1}" />
         ${stickersHtml}
