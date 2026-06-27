@@ -1141,42 +1141,56 @@ Reglas del cuento:
           if (titleMatch) storyTitle = titleMatch[1];
         }
 
-        // Detectar páginas completas en el stream acumulado.
-        // Una página está completa cuando su campo "text" cerró comillas y llave.
-        // Estrategia: buscar bloques que tengan todos los campos requeridos.
-        const pagePattern = /\{[^{}]*"page"\s*:\s*(\d+)[^{}]*"characters_present"\s*:\s*(\[[^\]]*\])[^{}]*"image_prompt"\s*:\s*"((?:[^"\\]|\\.)*)"[^{}]*"text"\s*:\s*"((?:[^"\\]|\\.)*)"[^{}]*\}/gs;
-        let match;
+        // Detectar páginas completas contando llaves desde cada "page": N
+        // Más robusto que regex: funciona con cualquier contenido en los campos
+        const pageStarts = [...fullText.matchAll(/"page"\s*:\s*(\d+)/g)];
         const foundPages = [];
-        while ((match = pagePattern.exec(fullText)) !== null) {
-          foundPages.push({
-            pageNum: parseInt(match[1]),
-            raw: match[0]
-          });
+
+        for (const ps of pageStarts) {
+          // Buscar el inicio del objeto { que contiene este "page"
+          let objStart = ps.index;
+          while (objStart > 0 && fullText[objStart] !== '{') objStart--;
+          if (fullText[objStart] !== '{') continue;
+
+          // Contar llaves para encontrar el cierre
+          let depth = 0;
+          let objEnd = -1;
+          for (let ci = objStart; ci < fullText.length; ci++) {
+            if (fullText[ci] === '{') depth++;
+            else if (fullText[ci] === '}') {
+              depth--;
+              if (depth === 0) { objEnd = ci; break; }
+            }
+          }
+          if (objEnd === -1) continue; // Página aún no cerró
+
+          const raw = fullText.slice(objStart, objEnd + 1);
+          // Verificar que tiene los campos mínimos necesarios
+          if (!raw.includes('"text"') || !raw.includes('"image_prompt"')) continue;
+          foundPages.push({ pageNum: parseInt(ps[1]), raw });
         }
 
-        // Emitir solo las páginas nuevas (más de las que ya emitimos)
+        // Emitir solo las páginas nuevas
         if (foundPages.length > emittedCount) {
           if (!storyStarted && storyTitle) {
             storyStarted = true;
-            // Inicializar el reader con el título
             document.getElementById('story-title').textContent = storyTitle;
             document.getElementById('pages-read').textContent = '6';
-            const stage = document.getElementById('book-stage');
-            stage.querySelectorAll('.comic-page').forEach(p => p.remove());
+            document.getElementById('book-stage').querySelectorAll('.comic-page').forEach(p => p.remove());
+            storyPages = [];
             showScreen('reader');
             stopFunFacts();
           }
 
           while (emittedCount < foundPages.length) {
-            const { pageNum, raw } = foundPages[emittedCount];
+            const { raw } = foundPages[emittedCount];
             try {
               const pageObj = JSON.parse(raw);
-              const pageIdx = emittedCount;
-              renderOnePage(pageObj, pageIdx);
-              generateOneImage(pageObj, pageIdx);
+              renderOnePage(pageObj, emittedCount);
+              generateOneImage(pageObj, emittedCount);
               emittedCount++;
             } catch {
-              break; // JSON no válido aún — esperar más texto
+              break; // JSON aún no válido — esperar más texto
             }
           }
         }
