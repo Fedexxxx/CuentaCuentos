@@ -433,21 +433,20 @@ const IMAGES_ENABLED = true;
   .page-sticker {
     position: absolute;
     z-index: 2;
-    height: 38%;
+    height: 28%;
     width: auto;
     object-fit: contain;
-    mix-blend-mode: multiply;
     pointer-events: none;
     opacity: 0;
+    filter: drop-shadow(0 3px 8px rgba(0,0,0,0.22));
     transition: opacity 0.5s ease;
   }
   .page-sticker.sticker-hidden { opacity: 0; }
   .page-sticker.sticker-visible { opacity: 1; }
-  /* Un solo sticker: centrado en el tercio inferior-medio */
-  .sticker-pos-1-0 { left: 50%; bottom: 38%; transform: translateX(-50%); }
-  /* Dos stickers: uno a cada lado, encarados */
-  .sticker-pos-2-0 { left: 18%; bottom: 36%; }
-  .sticker-pos-2-1 { right: 18%; bottom: 36%; transform: scaleX(-1); }
+  /* Carriles fijos por rol — nunca se superponen sin importar cuántos aparezcan */
+  .sticker-lane-hero    { left: 5%;  bottom: 5%; }
+  .sticker-lane-friend  { left: 50%; bottom: 5%; transform: translateX(-50%); }
+  .sticker-lane-villain { right: 5%; bottom: 5%; transform: scaleX(-1); }
 
   @keyframes shimmer {
     0% { background-position: -880px 0; }
@@ -884,55 +883,46 @@ const STICKER_MAP = {
   sombra: 'villain-sombra',
 };
 
-// Elige una variante al azar para un personaje (v1-v4). Se resuelve una sola vez por
-// personaje y se mantiene fija durante todo el cuento para consistencia visual.
-const chosenVariant = {};
-function getStickerSrc(charId) {
-  if (!chosenVariant[charId]) {
-    chosenVariant[charId] = Math.floor(Math.random() * STICKER_VARIANTS) + 1;
-  }
-  return `${STICKER_DIR}/${charId}-v${chosenVariant[charId]}.png`;
+// Asigna una variante distinta a cada aparición de un personaje a lo largo del cuento.
+// Así el héroe en pág 1 puede tener pose diferente al héroe en pág 6.
+const variantCounters = {};
+function getStickerSrcForAppearance(charId) {
+  if (!variantCounters[charId]) variantCounters[charId] = 0;
+  variantCounters[charId]++;
+  const v = ((variantCounters[charId] - 1) % STICKER_VARIANTS) + 1;
+  return `${STICKER_DIR}/${charId}-v${v}.png`;
 }
 
-// Si la variante elegida no existe (curación la eliminó), prueba con las demás antes de ocultar
-function handleStickerError(imgEl, charId, attempted) {
-  attempted = attempted || [];
-  attempted.push(chosenVariant[charId]);
-  const remaining = [1, 2, 3, 4].filter(v => !attempted.includes(v));
-  if (remaining.length === 0) { imgEl.style.display = 'none'; return; }
-  const nextVariant = remaining[Math.floor(Math.random() * remaining.length)];
-  chosenVariant[charId] = nextVariant;
-  imgEl.onerror = function() { handleStickerError(imgEl, charId, attempted); };
-  imgEl.src = `${STICKER_DIR}/${charId}-v${nextVariant}.png`;
-}
-
-function getStickersForPage(pageIndex) {
+// Lee characters_present de la página generada por Claude.
+// Devuelve array de {role, charId, src} con carril asignado por rol.
+function getStickersForPage(page) {
+  const present = Array.isArray(page?.characters_present) ? page.characters_present : [];
   const stickers = [];
-  const lastPage = 5; // cuento siempre de 6 páginas (índices 0-5)
-  const isClimax = pageIndex >= 2 && pageIndex <= 4;
-  const isFinal = pageIndex === lastPage;
-
-  if (pageIndex === 0 && selections.hero?.val && STICKER_MAP[selections.hero.val]) {
-    stickers.push(STICKER_MAP[selections.hero.val]);
+  if (present.includes('hero') && selections.hero?.val && STICKER_MAP[selections.hero.val]) {
+    const charId = STICKER_MAP[selections.hero.val];
+    stickers.push({ role: 'hero', charId, src: getStickerSrcForAppearance(charId) });
   }
-  if (pageIndex === 1 && selections.hero?.val && STICKER_MAP[selections.hero.val]) {
-    stickers.push(STICKER_MAP[selections.hero.val]);
+  if (present.includes('friend') && selections.friend?.val && STICKER_MAP[selections.friend.val]) {
+    const charId = STICKER_MAP[selections.friend.val];
+    stickers.push({ role: 'friend', charId, src: getStickerSrcForAppearance(charId) });
   }
-  if (pageIndex === 1 && selections.friend?.val && STICKER_MAP[selections.friend.val]) {
-    stickers.push(STICKER_MAP[selections.friend.val]);
-  }
-  if (isClimax && selections.villain?.val && STICKER_MAP[selections.villain.val]) {
-    stickers.push(STICKER_MAP[selections.villain.val]);
-  }
-  if (isFinal) {
-    if (selections.hero?.val && STICKER_MAP[selections.hero.val]) {
-      stickers.push(STICKER_MAP[selections.hero.val]);
-    }
-    if (selections.friend?.val && STICKER_MAP[selections.friend.val]) {
-      stickers.push(STICKER_MAP[selections.friend.val]);
-    }
+  if (present.includes('villain') && selections.villain?.val && STICKER_MAP[selections.villain.val]) {
+    const charId = STICKER_MAP[selections.villain.val];
+    stickers.push({ role: 'villain', charId, src: getStickerSrcForAppearance(charId) });
   }
   return stickers;
+}
+
+// Si un sticker falla al cargar, prueba otras variantes del mismo personaje
+function handleStickerError(imgEl, charId, attempted) {
+  attempted = attempted || [];
+  const m = imgEl.src.match(/-v(\d+)\.png$/);
+  const currentV = m ? parseInt(m[1]) : 1;
+  if (!attempted.includes(currentV)) attempted.push(currentV);
+  const remaining = [1, 2, 3, 4].filter(v => !attempted.includes(v));
+  if (remaining.length === 0) { imgEl.style.display = 'none'; return; }
+  imgEl.onerror = () => handleStickerError(imgEl, charId, attempted);
+  imgEl.src = `${STICKER_DIR}/${charId}-v${remaining[0]}.png`;
 }
 let storyPages = [];
 let currentPage = 0;
@@ -1043,18 +1033,25 @@ async function startGeneration() {
 
     storyPages = story.pages;
     currentStory = story;
-    renderReader(story.title, story.pages);
+
+    // Si el streaming progresivo ya renderizó las páginas (storyPages ya tiene contenido
+    // al llegar acá), solo actualizamos el título y navegamos. Si algo falló en el stream
+    // y no llegaron páginas, renderizamos todo de una como fallback.
+    if (document.querySelectorAll('.comic-page').length === 0) {
+      renderReader(story.title, story.pages);
+      if (IMAGES_ENABLED) generateImages(story);
+      showScreen('reader');
+    } else {
+      // Stream ya mostró el reader — solo nos aseguramos de estar en la página 1
+      document.getElementById('story-title').textContent = story.title;
+      currentPage = 0;
+    }
 
     // Barra al 100% con transición rápida
     bar.style.transition = 'width 0.4s ease';
     bar.style.width = '100%';
-
     await new Promise(r => setTimeout(r, 350));
-    currentPage = 0;
-    showScreen('reader');
     showSwipeHint();
-
-    if (IMAGES_ENABLED) generateImages(story);
 
   } catch (err) {
     cleanup();
@@ -1068,14 +1065,10 @@ async function startGeneration() {
 }
 
 async function generateStoryText() {
-  const response = await fetch('/api/generate-story', {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({
-      model: 'claude-sonnet-4-5',
-      max_tokens: 2000,
-      stream: true,
-      system: `Sos un escritor de cuentos infantiles en español para niños de 6 a 10 años.
+  // Reseteamos contadores de variante para el cuento nuevo
+  Object.keys(variantCounters).forEach(k => delete variantCounters[k]);
+
+  const SYSTEM_PROMPT = `Sos un escritor de cuentos infantiles en español para niños de 6 a 10 años.
 Tu tarea es generar un cuento corto estructurado en exactamente 6 páginas.
 Responde ÚNICAMENTE con un objeto JSON válido, sin texto adicional, sin backticks, sin markdown.
 El JSON debe tener exactamente esta estructura:
@@ -1085,7 +1078,8 @@ El JSON debe tener exactamente esta estructura:
     {
       "page": 1,
       "emoji": "un solo emoji que represente la escena",
-      "image_prompt": "describe ONLY the scene atmosphere in English in 1-2 sentences for a children's book illustrator. Focus on the setting, magical objects, nature, light and mood. Do NOT mention any character, creature, person, animal or silhouette of any kind — describe only the empty environment where the action happens: a glowing cave, a stormy sky clearing up, a forest path with footprints in the dirt, a castle window with light spilling out. Warm and inviting mood always. No text, nothing frightening.",
+      "characters_present": ["hero"],
+      "image_prompt": "describe ONLY the scene atmosphere in English in 1-2 sentences for a children's book illustrator. Focus on the setting, magical objects, nature, light and mood. Do NOT mention any character, creature, person, animal or silhouette of any kind — describe only the empty environment where the action happens: a glowing cave, a stormy sky clearing up, a forest path with footprints in the dirt. Warm and inviting mood always. No text, nothing frightening.",
       "text": "2 a 4 oraciones simples y vívidas para niños. Usá <strong>Nombre</strong> para el nombre del héroe la primera vez que aparece."
     }
   ]
@@ -1100,7 +1094,17 @@ Reglas del cuento:
 - Página 6: final feliz con moraleja sobre el tema dado
 - Tono: cálido, alegre, con tensión leve pero siempre seguro para niños
 - El nombre del héroe debe ser inventado, corto y memorable
-- image_prompt siempre en inglés, sin texto, sin palabras escritas, apto para niños`,
+- image_prompt siempre en inglés, sin texto, sin palabras escritas, apto para niños
+- characters_present: indicá exactamente qué personajes participan en ESA página. Solo: "hero", "friend", "villain". Sé preciso.`;
+
+  const response = await fetch('/api/generate-story', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+      model: 'claude-sonnet-4-6',
+      max_tokens: 2000,
+      stream: true,
+      system: SYSTEM_PROMPT,
       messages: [{ role: 'user', content: buildPrompt() }]
     })
   });
@@ -1111,6 +1115,9 @@ Reglas del cuento:
   const decoder = new TextDecoder();
   let sseBuffer = '';
   let fullText = '';
+  let storyStarted = false;
+  let emittedCount = 0;
+  let storyTitle = '';
 
   while (true) {
     const { done, value } = await reader.read();
@@ -1118,19 +1125,66 @@ Reglas del cuento:
     sseBuffer += decoder.decode(value, { stream: true });
     const lines = sseBuffer.split('\n');
     sseBuffer = lines.pop();
+
     for (const line of lines) {
       if (!line.startsWith('data: ')) continue;
       const data = line.slice(6).trim();
       if (data === '[DONE]') continue;
       try {
         const evt = JSON.parse(data);
-        if (evt.type === 'content_block_delta' && evt.delta?.type === 'text_delta') {
-          fullText += evt.delta.text;
+        if (evt.type !== 'content_block_delta' || evt.delta?.type !== 'text_delta') continue;
+        fullText += evt.delta.text;
+
+        // Extraer título cuando esté disponible
+        if (!storyTitle) {
+          const titleMatch = fullText.match(/"title"\s*:\s*"([^"]+)"/);
+          if (titleMatch) storyTitle = titleMatch[1];
         }
-      } catch { /* ignorar */ }
+
+        // Detectar páginas completas en el stream acumulado.
+        // Una página está completa cuando su campo "text" cerró comillas y llave.
+        // Estrategia: buscar bloques que tengan todos los campos requeridos.
+        const pagePattern = /\{[^{}]*"page"\s*:\s*(\d+)[^{}]*"characters_present"\s*:\s*(\[[^\]]*\])[^{}]*"image_prompt"\s*:\s*"((?:[^"\\]|\\.)*)"[^{}]*"text"\s*:\s*"((?:[^"\\]|\\.)*)"[^{}]*\}/gs;
+        let match;
+        const foundPages = [];
+        while ((match = pagePattern.exec(fullText)) !== null) {
+          foundPages.push({
+            pageNum: parseInt(match[1]),
+            raw: match[0]
+          });
+        }
+
+        // Emitir solo las páginas nuevas (más de las que ya emitimos)
+        if (foundPages.length > emittedCount) {
+          if (!storyStarted && storyTitle) {
+            storyStarted = true;
+            // Inicializar el reader con el título
+            document.getElementById('story-title').textContent = storyTitle;
+            document.getElementById('pages-read').textContent = '6';
+            const stage = document.getElementById('book-stage');
+            stage.querySelectorAll('.comic-page').forEach(p => p.remove());
+            showScreen('reader');
+            stopFunFacts();
+          }
+
+          while (emittedCount < foundPages.length) {
+            const { pageNum, raw } = foundPages[emittedCount];
+            try {
+              const pageObj = JSON.parse(raw);
+              const pageIdx = emittedCount;
+              renderOnePage(pageObj, pageIdx);
+              generateOneImage(pageObj, pageIdx);
+              emittedCount++;
+            } catch {
+              break; // JSON no válido aún — esperar más texto
+            }
+          }
+        }
+      } catch { /* ignorar errores de parse SSE */ }
     }
   }
 
+  // Parse final completo para asegurar consistencia
   const clean = fullText.replace(/```json|```/g, '').trim();
   const jsonMatch = clean.match(/\{[\s\S]*\}/);
   if (!jsonMatch) throw new Error('No se pudo parsear la historia');
@@ -1275,60 +1329,72 @@ function buildPrompt() {
 - Tema del final: ${outcome.label} (${outcome.emoji})`;
 }
 
+// Renderiza una sola página y la agrega al reader.
+// Se llama de a una página a medida que Claude las genera en el stream.
+function renderOnePage(pageObj, pageIdx) {
+  const TOTAL_PAGES = 6;
+  const stage = document.getElementById('book-stage');
+  const pageEl = document.createElement('div');
+  pageEl.className = 'comic-page' + (pageIdx === 0 ? ' active' : '');
+  pageEl.id = 'cpage-' + pageIdx;
+
+  const pageStickers = getStickersForPage(pageObj);
+  const stickersHtml = pageStickers.map(({ role, charId, src }) => `
+      <img class="page-sticker sticker-hidden sticker-lane-${role}" id="page-sticker-${pageIdx}-${role}"
+           src="${src}" alt=""
+           onerror="handleStickerError(this,'${charId}',[])">`)
+    .join('');
+
+  const isLast = pageIdx >= TOTAL_PAGES - 1;
+  pageEl.innerHTML = `
+    <div class="page-illustration bg-${pageIdx % 6}">
+      <div class="illus-shimmer" id="page-shimmer-${pageIdx}">
+        <div class="shimmer-text">${getShimmerText(pageIdx)}</div>
+      </div>
+      <img class="illus-img" id="page-img-${pageIdx}" alt="Ilustración de la página ${pageIdx + 1}" />
+      ${stickersHtml}
+    </div>
+    <div class="page-text-panel">
+      <div class="page-text-content">
+        <div class="page-num-label">Página ${pageObj.page} de ${TOTAL_PAGES}</div>
+        <div class="page-story-text" id="page-text-${pageIdx}">${pageObj.text}</div>
+      </div>
+      <div class="reader-nav">
+        <button class="r-btn" id="prev-${pageIdx}" ${pageIdx === 0 ? 'disabled' : ''} onclick="goToPage(${pageIdx - 1})">◀</button>
+        <div class="page-dots-row" id="dots-${pageIdx}"></div>
+        <button class="r-btn-main" id="next-main-${pageIdx}" onclick="${isLast ? "showScreen('end')" : `goToPage(${pageIdx + 1})`}">
+          ${isLast ? '🎉 ¡Fin!' : 'Siguiente →'}
+        </button>
+        <button class="r-btn" id="fwd-${pageIdx}" ${isLast ? 'disabled' : ''} onclick="goToPage(${pageIdx + 1})">▶</button>
+      </div>
+    </div>`;
+
+  stage.insertBefore(pageEl, document.getElementById('swipe-hint'));
+
+  // Dots de navegación: los actualizamos en cada página nueva
+  document.querySelectorAll('[id^="dots-"]').forEach(dotsEl => {
+    dotsEl.innerHTML = '';
+    const thisIdx = parseInt(dotsEl.id.replace('dots-', ''));
+    for (let j = 0; j <= pageIdx; j++) {
+      const dot = document.createElement('div');
+      dot.className = 'pdot' + (j === thisIdx ? ' active' : '');
+      dot.onclick = () => goToPage(j);
+      dotsEl.appendChild(dot);
+    }
+  });
+
+  storyPages.push(pageObj);
+  updateReaderNav();
+  if (pageIdx === 0) setupSwipe();
+}
+
+// Wrapper para compatibilidad — renderiza todas las páginas de una
 function renderReader(title, pages) {
   document.getElementById('story-title').textContent = title;
   document.getElementById('pages-read').textContent = pages.length;
-
-  const stage = document.getElementById('book-stage');
-  stage.querySelectorAll('.comic-page').forEach(p => p.remove());
-
-  pages.forEach((p, i) => {
-    const pageEl = document.createElement('div');
-    pageEl.className = 'comic-page' + (i === 0 ? ' active' : '');
-    pageEl.id = 'cpage-' + i;
-
-    const pageStickers = getStickersForPage(i);
-    const stickersHtml = pageStickers.map((charId, si) => `
-        <img class="page-sticker sticker-hidden sticker-pos-${pageStickers.length}-${si}" id="page-sticker-${i}-${si}" src="${getStickerSrc(charId)}" alt="" onerror="handleStickerError(this, '${charId}')">`).join('');
-
-    pageEl.innerHTML = `
-      <div class="page-illustration bg-${i % 6}">
-        <div class="illus-shimmer" id="page-shimmer-${i}">
-          <div class="shimmer-text">Estamos creando el cuento...</div>
-        </div>
-        <img class="illus-img" id="page-img-${i}" alt="Ilustración de la página ${i + 1}" />
-        ${stickersHtml}
-      </div>
-      <div class="page-text-panel">
-        <div class="page-text-content">
-          <div class="page-num-label">Página ${p.page} de ${pages.length}</div>
-          <div class="page-story-text" id="page-text-${i}">${p.text}</div>
-        </div>
-        <div class="reader-nav">
-          <button class="r-btn" id="prev-${i}" ${i === 0 ? 'disabled' : ''} onclick="goToPage(${i - 1})">◀</button>
-          <div class="page-dots-row" id="dots-${i}"></div>
-          <button class="r-btn-main" id="next-main-${i}" onclick="${i >= pages.length - 1 ? 'showScreen(\'end\')' : `goToPage(${i + 1})`}">
-            ${i >= pages.length - 1 ? '🎉 ¡Fin!' : 'Siguiente →'}
-          </button>
-          <button class="r-btn" id="fwd-${i}" ${i >= pages.length - 1 ? 'disabled' : ''} onclick="goToPage(${i + 1})">▶</button>
-        </div>
-      </div>`;
-
-    stage.insertBefore(pageEl, document.getElementById('swipe-hint'));
-  });
-
-  pages.forEach((_, i) => {
-    const dotsEl = document.getElementById('dots-' + i);
-    pages.forEach((__, j) => {
-      const dot = document.createElement('div');
-      dot.className = 'pdot' + (j === i ? ' active' : '');
-      dot.onclick = () => goToPage(j);
-      dotsEl.appendChild(dot);
-    });
-  });
-
-  updateReaderNav();
-  setupSwipe();
+  document.getElementById('book-stage').querySelectorAll('.comic-page').forEach(p => p.remove());
+  storyPages = [];
+  pages.forEach((p, i) => renderOnePage(p, i));
 }
 
 function goToPage(n) {
