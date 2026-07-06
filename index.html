@@ -928,8 +928,6 @@ let storyPages = [];
 let currentPage = 0;
 let currentStory = null;
 
-const IMAGE_STYLE = "soft watercolor children's book illustration, loose painterly washes, warm pastel colors, magical and dreamy atmosphere, beautiful detailed scenery and setting, NO characters, NO people, NO creatures, NO silhouettes, empty landscape only, no text, safe for children";
-
 function showScreen(id) {
   document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
   document.getElementById('screen-' + id).classList.add('active');
@@ -1079,8 +1077,7 @@ El JSON debe tener exactamente esta estructura:
       "page": 1,
       "emoji": "un solo emoji que represente la escena",
       "characters_present": ["hero"],
-      "image_prompt": "describe ONLY the scene atmosphere in English in 1-2 sentences for a children's book illustrator. Focus on the setting, magical objects, nature, light and mood. Do NOT mention any character, creature, person, animal or silhouette of any kind — describe only the empty environment where the action happens: a glowing cave, a stormy sky clearing up, a forest path with footprints in the dirt. Warm and inviting mood always. No text, nothing frightening.",
-      "text": "2 a 4 oraciones simples y vívidas para niños. Usá <strong>Nombre</strong> para el nombre del héroe la primera vez que aparece."
+      "scene_type": "el escenario de la página, EXACTAMENTE uno de: bosque, montana, cueva, mar, tormenta, laberinto, puente, castillo, pueblo, noche, pradera, maquinas",
     }
   ]
 }
@@ -1094,7 +1091,7 @@ Reglas del cuento:
 - Página 6: final feliz con moraleja sobre el tema dado
 - Tono: cálido, alegre, con tensión leve pero siempre seguro para niños
 - El nombre del héroe debe ser inventado, corto y memorable
-- image_prompt siempre en inglés, sin texto, sin palabras escritas, apto para niños
+- scene_type: elegí el valor de la lista que mejor represente dónde ocurre la escena. Sin tildes, en minúsculas, exactamente como está en la lista.
 - characters_present: indicá exactamente qué personajes participan en ESA página. Solo: "hero", "friend", "villain". Sé preciso.`;
 
   const response = await fetch('/api/generate-story', {
@@ -1166,7 +1163,7 @@ Reglas del cuento:
 
           const raw = fullText.slice(objStart, objEnd + 1);
           // Verificar que tiene los campos mínimos necesarios
-          if (!raw.includes('"text"') || !raw.includes('"image_prompt"')) continue;
+          if (!raw.includes('"text"') || !raw.includes('"scene_type"')) continue;
           foundPages.push({ pageNum: parseInt(ps[1]), raw });
         }
 
@@ -1277,62 +1274,37 @@ function getShimmerText(pageIndex) {
   return SHIMMER_TEXTS.default[pageIndex % SHIMMER_TEXTS.default.length];
 }
 
-async function generateImages(story) {
-  const pages = story.pages;
-  Promise.allSettled(pages.map((page, i) => generateOneImage(page, i)));
+function generateImages(story) {
+  story.pages.forEach((p, i) => generateOneImage(p, i));
 }
 
-async function generateOneImage(page, index) {
-  const dot = document.getElementById('idot-' + index);
+const BG_DIR = '/public/backgrounds';
+const BG_VARIANTS = 3;
+const SCENE_TYPES = ['bosque','montana','cueva','mar','tormenta','laberinto','puente','castillo','pueblo','noche','pradera','maquinas'];
+const usedVariants = {};
+
+function generateOneImage(page, index) {
   const imgEl = document.getElementById('page-img-' + index);
   const shimmerEl = document.getElementById('page-shimmer-' + index);
+  const dot = document.getElementById('idot-' + index);
 
-  if (dot) dot.classList.add('loading');
+  const scene = SCENE_TYPES.includes(page.scene_type) ? page.scene_type : SCENE_TYPES[index % SCENE_TYPES.length];
+  if (!(scene in usedVariants)) usedVariants[scene] = Math.floor(Math.random() * BG_VARIANTS);
+  usedVariants[scene] = (usedVariants[scene] % BG_VARIANTS) + 1;
 
-  const fullPrompt = `${IMAGE_STYLE}. Scene: ${page.image_prompt}`;
-
-  try {
-    const resp = await fetch('/api/generate-image', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        model: 'gpt-image-1-mini',
-        prompt: fullPrompt,
-        n: 1,
-        size: '1024x1024',
-        quality: 'low'
-      })
-    });
-
-    const data = await resp.json();
-    if (data.error) throw new Error(data.error.message);
-
-    const b64 = data.data[0].b64_json;
-const url = `data:image/png;base64,${b64}`;
-    if (imgEl) {
-      imgEl.src = url;
-      imgEl.onload = () => {
-        imgEl.classList.add('loaded');
-        if (shimmerEl) shimmerEl.classList.add('hidden');
-        document.querySelectorAll(`[id^="page-sticker-${index}-"]`).forEach(el => {
-          el.classList.remove('sticker-hidden');
-          el.classList.add('sticker-visible');
-        });
-      };
-    }
-    if (dot) { dot.classList.remove('loading'); dot.classList.add('done'); }
-
-  } catch (err) {
-    if (shimmerEl) {
-      shimmerEl.innerHTML = `<div class="shimmer-text">Ilustración no disponible</div>`;
-      shimmerEl.style.animation = 'none';
-      shimmerEl.style.background = 'rgba(255,255,255,0.05)';
-    }
-    if (dot) { dot.classList.remove('loading'); dot.style.background = '#FFB0B0'; }
-    console.warn('Image generation failed for page', index + 1, err.message);
+  if (imgEl) {
+    imgEl.onload = () => {
+      imgEl.classList.add('loaded');
+      if (shimmerEl) shimmerEl.classList.add('hidden');
+      document.querySelectorAll(`[id^="page-sticker-${index}-"]`).forEach(el => {
+        el.classList.remove('sticker-hidden');
+        el.classList.add('sticker-visible');
+      });
+    };
+    imgEl.src = `${BG_DIR}/${scene}-${usedVariants[scene]}.webp`;
   }
+  if (dot) { dot.classList.remove('loading'); dot.classList.add('done'); }
 }
-
 function buildPrompt() {
   const outcome = randomOutcome();
   return `Escribí un cuento infantil con estos elementos:
