@@ -433,7 +433,7 @@ const IMAGES_ENABLED = true;
   .page-sticker {
     position: absolute;
     z-index: 2;
-    height: 28%;
+    height: 24%;
     width: auto;
     object-fit: contain;
     pointer-events: none;
@@ -444,9 +444,9 @@ const IMAGES_ENABLED = true;
   .page-sticker.sticker-hidden { opacity: 0; }
   .page-sticker.sticker-visible { opacity: 1; }
   /* Carriles fijos por rol — nunca se superponen sin importar cuántos aparezcan */
-  .sticker-lane-hero    { left: 5%;  bottom: 5%; }
-  .sticker-lane-friend  { left: 50%; bottom: 5%; transform: translateX(-50%); }
-  .sticker-lane-villain { right: 5%; bottom: 5%; transform: scaleX(-1); }
+  .sticker-lane-hero    { left: 5%;  bottom: 34%; }
+  .sticker-lane-friend  { left: 50%; bottom: 34%; transform: translateX(-50%); }
+  .sticker-lane-villain { right: 5%; bottom: 34%; transform: scaleX(-1); }
 
   @keyframes shimmer {
     0% { background-position: -880px 0; }
@@ -1078,6 +1078,7 @@ El JSON debe tener exactamente esta estructura:
       "emoji": "un solo emoji que represente la escena",
       "characters_present": ["hero"],
       "scene_type": "el escenario de la página, EXACTAMENTE uno de: bosque, montana, cueva, mar, tormenta, laberinto, puente, castillo, pueblo, noche, pradera, maquinas",
+      "text": "2 a 4 oraciones simples y vívidas para niños. Usá <strong>Nombre</strong> para el nombre del héroe la primera vez que aparece."
     }
   ]
 }
