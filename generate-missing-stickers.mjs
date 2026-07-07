@@ -18,6 +18,7 @@ const CHARACTERS = {
   'friend-anciana':     'a kind elderly woman with white hair in a bun, round glasses, warm smile, cozy shawl, carrying a small basket',
   'villain-bruja':      'a quirky witch with a wobbly purple hat and striped socks, mischievous but harmless grin, holding a small wooden spoon',
   'hero-explorador':    'a young boy explorer with a green backpack, compass in hand, adventurous smile, explorer hat',
+  'hero-mago':          'a mysterious young wizard with a deep blue robe covered in tiny golden stars, tall pointed blue hat, holding a glowing wooden staff, gentle wise smile',
   'villain-maquina':    'a whimsical floating antique machine with a rounded copper body and a frowning clock-dial face, hovering gently in the air with soft magical sparkles underneath, NO wheels, NO legs, NO tracks, levitating, ethereal and dreamlike',
   'villain-sombra':     'a soft round shadow creature in deep indigo and purple watercolor, big expressive white eyes, grumpy but adorable, compact solid silhouette with smooth clean edges, slightly translucent at the top like mist',
 };
