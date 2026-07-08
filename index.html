@@ -41,6 +41,7 @@ const IMAGES_ENABLED = true;
     align-items: flex-start;
     justify-content: center;
     padding: 24px 16px;
+    overflow-x: hidden;
   }
 
   .app {
@@ -141,7 +142,9 @@ const IMAGES_ENABLED = true;
 
   .cards-scroll {
     display: flex; gap: 10px;
-    overflow-x: auto; padding-bottom: 6px; padding-top: 4px;
+    overflow-x: auto;
+    padding: 4px 4px 6px;
+    margin: 0 -4px;
     scrollbar-width: none;
   }
   .cards-scroll::-webkit-scrollbar { display: none; }
