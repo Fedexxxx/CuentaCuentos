@@ -2,7 +2,7 @@ import fs from 'node:fs';
 
 const KEY = process.env.OPENAI_API_KEY;
 const CARD_STYLE = "soft watercolor illustration for a children's picture book, gentle washes of color, loose painterly brushstrokes, warm pastel palette, white paper texture showing through, cute and friendly character with simple rounded shapes, no text, no dark elements, safe for children aged 4-10, square composition with subject centered, plenty of white space around edges";
-const MAGO = "a mysterious young wizard with a deep blue robe covered in tiny golden stars, tall pointed blue hat, holding a glowing wooden staff, gentle wise smile, watercolor children illustration";
+const BRUJA = 'villain-bruja':      'an eccentric elderly time witch with wild silver hair, flowing deep purple and midnight blue robes decorated with clock faces and golden spirals, holding a glowing hourglass, mysterious knowing expression, intriguing but not scary',
 
 const resp = await fetch('https://api.openai.com/v1/images/generations', {
   method: 'POST',

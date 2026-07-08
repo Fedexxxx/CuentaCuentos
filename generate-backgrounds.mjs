@@ -10,7 +10,7 @@ const STYLE = "soft watercolor children's book illustration, loose painterly was
 const SCENES = {
   bosque:    "a magical forest path with tall friendly trees, dappled golden light, mushrooms and fireflies",
   montana:   "rolling mountains with a winding path, soft clouds, morning light over green valleys",
-  cueva:     "the inside of a cozy magical cave painted in loose watercolor washes, warm golden lantern glow, soft rounded rock shapes in amber and ochre tones, a few gentle sparkles, dreamy and inviting",
+  cueva:     "the inside of a cozy magical cave painted in loose soft watercolor washes on textured paper, warm golden lantern glow, gently rounded rock shapes in amber and ochre tones, a smooth flat sandy floor stretching across the entire lower third of the image, a few soft sparkles, dreamy and inviting, hand-painted children's book style",
   mar:       "a calm turquoise sea with gentle waves, a sandy shore, distant sailboat, warm sky",
   tormenta:  "a dramatic but soft stormy sky with rain clouds parting, a rainbow beginning to appear",
   laberinto: "a whimsical garden maze with tall green hedges, stone archways, golden afternoon light",
