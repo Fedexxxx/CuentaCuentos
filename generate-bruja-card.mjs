@@ -1,0 +1,22 @@
+import fs from 'node:fs';
+const KEY = process.env.OPENAI_API_KEY;
+if (!KEY) { console.error('Falta OPENAI_API_KEY'); process.exit(1); }
+
+const CARD_STYLE = "soft watercolor illustration for a children's picture book, gentle washes of color, loose painterly brushstrokes, warm pastel palette, white paper texture showing through, cute and friendly character with simple rounded shapes, no text, no dark elements, safe for children aged 4-10, square composition with subject centered, plenty of white space around edges";
+const BRUJA = "an eccentric elderly time witch with wild silver hair, flowing deep purple and midnight blue robes decorated with clock faces and golden spirals, holding a glowing hourglass, mysterious knowing expression, intriguing but not scary";
+
+const resp = await fetch('https://api.openai.com/v1/images/generations', {
+  method: 'POST',
+  headers: { 'Authorization': `Bearer ${KEY}`, 'Content-Type': 'application/json' },
+  body: JSON.stringify({
+    model: 'gpt-image-1',
+    prompt: `${CARD_STYLE}. Subject: ${BRUJA}`,
+    size: '1024x1024',
+    quality: 'low',
+    n: 1,
+  }),
+});
+const data = await resp.json();
+if (data.error) { console.error(data.error.message); process.exit(1); }
+fs.writeFileSync('public/cards/villain-bruja.png', Buffer.from(data.data[0].b64_json, 'base64'));
+console.log('villain-bruja.png OK');
