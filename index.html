@@ -1102,6 +1102,7 @@ Reglas del cuento:
 - Tono: cálido, alegre, con tensión leve pero siempre seguro para niños
 - El nombre del héroe debe ser inventado, corto y memorable
 - scene_type: elegí el valor de la lista que mejor represente dónde ocurre la escena. Sin tildes, en minúsculas, exactamente como está en la lista.
+- En el campo text NUNCA uses comillas dobles ("). Para diálogos usá rayas de diálogo (—) y para destacar palabras usá <strong>. Ninguna comilla doble dentro de ningún valor de texto.
 - characters_present: indicá exactamente qué personajes participan en ESA página. Solo: "hero", "friend", "villain". Sé preciso.`;
 
   const response = await fetch('/api/generate-story', {
