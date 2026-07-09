@@ -449,8 +449,17 @@ const IMAGES_ENABLED = true;
   .sticker-lane-hero    { left: 6%;  bottom: 32%; height: 30%; }
   .sticker-lane-friend  { left: 52%; bottom: 39%; height: 24%; transform: translateX(-50%); }
   .sticker-lane-villain { right: 4%; bottom: 45%; height: 26%; transform: scaleX(-1); }
-  /* Página 3: el villano entra en escena — central, alto, grande */
-  #page-sticker-2-villain { right: 12%; bottom: 54%; height: 30%; }
+  /* Página 2: héroe a la derecha, amigo al centro */
+  #page-sticker-1-hero { left: auto; right: 6%; transform: scaleX(-1); }
+
+  /* Página 3: héroe derecha y más grande, villano entra por la izquierda, elevado */
+  #page-sticker-2-hero { left: auto; right: 6%; height: 34%; transform: scaleX(-1); }
+  #page-sticker-2-villain { left: 10%; right: auto; bottom: 54%; height: 33%; transform: none; }
+
+  /* Página 5: clímax invertido — héroe protagonista a la derecha, villano a la izquierda */
+  #page-sticker-4-hero { left: auto; right: 6%; height: 35%; transform: scaleX(-1); }
+  #page-sticker-4-friend { left: 46%; }
+  #page-sticker-4-villain { left: 8%; right: auto; bottom: 45%; height: 28%; transform: none; }
  
   @keyframes shimmer {
     0% { background-position: -880px 0; }
